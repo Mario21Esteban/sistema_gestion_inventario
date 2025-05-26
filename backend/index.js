@@ -13,9 +13,15 @@ app.use(express.json());
 
 const activoRoutes = require('./routes/activo.routes');
 app.use('/api/activos', activoRoutes);
+
 const ubicacionRoutes = require('./routes/ubicacion.routes');
 app.use('/api/ubicaciones', ubicacionRoutes);
 
+const estadoRoutes = require('./routes/estado.routes');
+app.use('/api/estados', estadoRoutes);
+
+const facturaRoutes = require('./routes/factura.routes');
+app.use('/api/factura', facturaRoutes);
 
 
 
