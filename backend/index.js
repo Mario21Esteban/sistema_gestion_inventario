@@ -26,7 +26,11 @@ app.use('/api/factura', facturaRoutes);
 const personaRoutes = require('./routes/persona.routes');
 app.use('/api/personas', personaRoutes);
 
+const prestamoRoutes = require('./routes/prestamo.routes');
+app.use('/api/prestamos', prestamoRoutes);
 
+const detallePrestamoRoutes = require('./routes/detallePrestamo.routes');
+app.use('/api/detalle-prestamos', detallePrestamoRoutes);
 
 
 
