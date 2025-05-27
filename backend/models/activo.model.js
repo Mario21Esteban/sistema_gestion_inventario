@@ -43,7 +43,41 @@ getBySerie: (nroSerie, callback) => {
     }
     callback(null, result[0]);
   });
+},
+
+create: (activo, callback) => {
+  const sql = `
+    INSERT INTO activos (
+      nombre, descripcion, foto, costo, año_adquisicion,
+      nro_serie, codigo, categoria, observaciones,
+      ubicacion_id, factura_id, estado_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    activo.nombre,
+    activo.descripcion,
+    activo.foto,
+    activo.costo,
+    activo.año_adquisicion,
+    activo.nro_serie,
+    activo.codigo,
+    activo.categoria,
+    activo.observaciones,
+    activo.ubicacion_id,
+    activo.factura_id,
+    activo.estado_id
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Error al crear activo:', err);
+      return callback(err, null);
+    }
+    callback(null, { insertId: result.insertId });
+  });
 }
+
 
 };
 

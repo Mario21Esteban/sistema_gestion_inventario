@@ -23,6 +23,10 @@ app.use('/api/estados', estadoRoutes);
 const facturaRoutes = require('./routes/factura.routes');
 app.use('/api/factura', facturaRoutes);
 
+const personaRoutes = require('./routes/persona.routes');
+app.use('/api/personas', personaRoutes);
+
+
 
 
 

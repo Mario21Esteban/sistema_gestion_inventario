@@ -43,11 +43,34 @@ const getActivoBySerie = (req, res) => {
   });
 };
 
+const createActivo = (req, res) => {
+  const data = req.body;
+
+  const camposObligatorios = [
+    'nombre', 'codigo', 'nro_serie', 'categoria',
+    'ubicacion_id', 'factura_id', 'estado_id'
+  ];
+
+  const faltantes = camposObligatorios.filter(campo => !data[campo]);
+
+  if (faltantes.length > 0) {
+    return res.status(400).json({ error: `Faltan campos: ${faltantes.join(', ')}` });
+  }
+
+  Activo.create(data, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al registrar activo' });
+    res.status(201).json({ id_activo: result.insertId });
+  });
+};
+
+
 // Controlador para manejar las operaciones relacionadas con los activos
 // Exportar los controladores
 module.exports = {
   getActivos,
   getActivoById,
   getActivoByCodigo,
-  getActivoBySerie
+  getActivoBySerie,
+  createActivo
 };
+
