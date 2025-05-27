@@ -39,7 +39,33 @@ const Prestamo = {
     }
     callback(null, { insertId: result.insertId });
   });
-}
+},
+
+getDetalleAgrupado: (callback) => {
+  const sql = `
+    SELECT 
+      pr.id_prestamo,
+      pr.fecha_prestamo,
+      pr.fecha_devolucion,
+      per.nombre AS persona,
+      a.id_activo,
+      a.nombre AS activo
+    FROM prestamos pr
+    JOIN persona per ON pr.persona_id = per.id_persona
+    JOIN detalle_prestamos dp ON dp.prestamo_id = pr.id_prestamo
+    JOIN activos a ON a.id_activo = dp.activo_id
+    ORDER BY pr.id_prestamo
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error al obtener préstamos agrupados:', err);
+      return callback(err, null);
+    }
+    callback(null, results);
+  });
+},
+
 
 };
 

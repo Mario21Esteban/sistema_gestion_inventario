@@ -63,6 +63,14 @@ const createActivo = (req, res) => {
   });
 };
 
+const getActivosDisponibles = (req, res) => {
+  Activo.getDisponibles((err, data) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener activos disponibles' });
+    res.json(data);
+  });
+};
+
+
 
 // Controlador para manejar las operaciones relacionadas con los activos
 // Exportar los controladores
@@ -71,6 +79,7 @@ module.exports = {
   getActivoById,
   getActivoByCodigo,
   getActivoBySerie,
-  createActivo
+  createActivo,
+  getActivosDisponibles
 };
 

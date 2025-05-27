@@ -5,11 +5,13 @@ const {
   getActivoById,
   getActivoByCodigo,
   getActivoBySerie,
-  createActivo
+  createActivo,
+  getActivosDisponibles
 } = require('../controllers/activo.controller');
 
 
 router.get('/', getActivos);
+router.get('/disponibles', getActivosDisponibles);
 router.get('/codigo/:codigo', getActivoByCodigo);
 router.get('/serie/:nro_serie', getActivoBySerie);
 router.post('/', createActivo);

@@ -76,7 +76,24 @@ create: (activo, callback) => {
     }
     callback(null, { insertId: result.insertId });
   });
+},
+
+getDisponibles: (callback) => {
+  const sql = `
+    SELECT a.*
+    FROM activos a
+    WHERE a.estado_id = 1
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error al obtener activos disponibles:', err);
+      return callback(err, null);
+    }
+    callback(null, results);
+  });
 }
+
 
 
 };
