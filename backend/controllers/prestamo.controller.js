@@ -50,10 +50,25 @@ const getPrestamosAgrupados = (req, res) => {
   });
 };
 
+const devolverPrestamo = (req, res) => {
+  const id = req.params.id;
+
+  Prestamo.devolverPrestamo(id, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al devolver el préstamo' });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: 'Préstamo no encontrado o ya devuelto' });
+    }
+
+    res.json({ mensaje: 'Préstamo devuelto correctamente', fecha_devolucion: new Date().toISOString().split('T')[0] });
+  });
+};
+
 
 
 module.exports = {
   getPrestamos,
   createPrestamo,
-  getPrestamosAgrupados
+  getPrestamosAgrupados,
+  devolverPrestamo
 };

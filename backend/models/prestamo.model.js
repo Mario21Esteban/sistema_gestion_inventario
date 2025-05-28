@@ -66,6 +66,22 @@ getDetalleAgrupado: (callback) => {
   });
 },
 
+devolverPrestamo: (id, callback) => {
+  const sql = `
+    UPDATE prestamos
+    SET fecha_devolucion = CURDATE()
+    WHERE id_prestamo = ?
+  `;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('Error al devolver préstamo:', err);
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+}
+
 
 };
 

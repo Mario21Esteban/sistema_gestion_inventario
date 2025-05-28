@@ -92,7 +92,68 @@ getDisponibles: (callback) => {
     }
     callback(null, results);
   });
+},
+
+update: (id, data, callback) => {
+  const sql = `
+    UPDATE activos SET
+      nombre = ?,
+      descripcion = ?,
+      foto = ?,
+      costo = ?,
+      año_adquisicion = ?,
+      nro_serie = ?,
+      codigo = ?,
+      categoria = ?,
+      observaciones = ?,
+      ubicacion_id = ?,
+      factura_id = ?,
+      estado_id = ?
+    WHERE id_activo = ?
+  `;
+
+  const values = [
+    data.nombre,
+    data.descripcion,
+    data.foto,
+    data.costo,
+    data.año_adquisicion,
+    data.nro_serie,
+    data.codigo,
+    data.categoria,
+    data.observaciones,
+    data.ubicacion_id,
+    data.factura_id,
+    data.estado_id,
+    id
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Error al actualizar activo:', err);
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
+},
+
+deleteLogico: (id, callback) => {
+  const sql = `
+    UPDATE activos
+    SET estado_id = 2
+    WHERE id_activo = ?
+  `;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('Error al dar de baja el activo:', err);
+      return callback(err, null);
+    }
+    callback(null, result);
+  });
 }
+
+
 
 
 
