@@ -67,20 +67,63 @@ getDetalleAgrupado: (callback) => {
 },
 
 devolverPrestamo: (id, callback) => {
-  const sql = `
+  const sql1 = `
     UPDATE prestamos
-    SET fecha_devolucion = CURDATE()
+    SET fecha_devolucion_real = CURDATE()
     WHERE id_prestamo = ?
   `;
 
-  db.query(sql, [id], (err, result) => {
+  const sql2 = `
+    UPDATE detalle_prestamos
+    SET fecha_devolucion_real = CURDATE()
+    WHERE prestamo_id = ?
+  `;
+
+  // Ejecutar ambas queries en orden
+  db.query(sql1, [id], (err, result1) => {
     if (err) {
-      console.error('Error al devolver préstamo:', err);
+      console.error('Error al actualizar préstamo:', err);
       return callback(err, null);
     }
-    callback(null, result);
+
+    db.query(sql2, [id], (err, result2) => {
+      if (err) {
+        console.error('Error al actualizar detalle_prestamos:', err);
+        return callback(err, null);
+      }
+
+      callback(null, { prestamos: result1, detalles: result2 });
+    });
+  });
+},
+
+getPrestamosPorActivo: (id_activo, callback) => {
+  const sql = `
+    SELECT 
+      p.id_prestamo,
+      p.fecha_prestamo,
+      p.fecha_devolucion,
+      p.fecha_devolucion_real,
+      per.nombre AS nombre_persona,
+      per.cargo
+    FROM detalle_prestamos dp
+    JOIN prestamos p ON dp.prestamo_id = p.id_prestamo
+    JOIN persona per ON p.persona_id = per.id_persona
+    WHERE dp.activo_id = ?
+    ORDER BY p.fecha_prestamo DESC
+  `;
+
+  db.query(sql, [id_activo], (err, rows) => {
+    if (err) {
+      console.error('Error al obtener préstamos por activo:', err);
+      return callback(err, null);
+    }
+    callback(null, rows);
   });
 }
+
+
+
 
 
 };

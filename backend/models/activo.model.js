@@ -137,22 +137,49 @@ update: (id, data, callback) => {
   });
 },
 
-deleteLogico: (id, callback) => {
+darDeBaja: (id, motivo, callback) => {
   const sql = `
     UPDATE activos
-    SET estado_id = 2
+    SET estado_id = 2,
+        motivo_baja = ?,
+        fecha_baja = CURDATE()
     WHERE id_activo = ?
   `;
 
-  db.query(sql, [id], (err, result) => {
+  db.query(sql, [motivo, id], (err, result) => {
     if (err) {
-      console.error('Error al dar de baja el activo:', err);
+      console.error('Error al dar de baja activo:', err);
       return callback(err, null);
     }
     callback(null, result);
   });
-}
+},
 
+getHistorialPrestamos: (id_activo, callback) => {
+  const sql = `
+    SELECT 
+      p.id_prestamo,
+      p.fecha_prestamo,
+      p.fecha_devolucion,
+      p.fecha_devolucion_real,
+      per.nombre AS nombre_persona,
+      per.cargo,
+      per.correo
+    FROM detalle_prestamos dp
+    JOIN prestamos p ON dp.prestamo_id = p.id_prestamo
+    JOIN persona per ON p.persona_id = per.id_persona
+    WHERE dp.activo_id = ?
+    ORDER BY p.fecha_prestamo DESC
+  `;
+
+  db.query(sql, [id_activo], (err, rows) => {
+    if (err) {
+      console.error('Error al obtener historial del activo:', err);
+      return callback(err, null);
+    }
+    callback(null, rows);
+  });
+}
 
 
 

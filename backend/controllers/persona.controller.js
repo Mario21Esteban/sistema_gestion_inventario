@@ -27,42 +27,17 @@ const createPersona = (req, res) => {
   });
 };
 
-const getPrestamosByPersona = (req, res) => {
+const getHistorialPorPersona = (req, res) => {
   const id = req.params.id;
 
-  Persona.getPrestamosConActivos(id, (err, rows) => {
-    if (err) return res.status(500).json({ error: 'Error al obtener préstamos' });
+  Persona.getHistorialPrestamos(id, (err, historial) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener historial de la persona' });
 
-    if (rows.length === 0) {
-      return res.status(404).json({ mensaje: 'La persona no tiene préstamos registrados' });
+    if (historial.length === 0) {
+      return res.status(404).json({ mensaje: 'Esta persona no tiene historial de préstamos' });
     }
 
-    const result = {
-      persona_id: rows[0].id_persona,
-      nombre: rows[0].nombre,
-      prestamos: []
-    };
-
-    rows.forEach(row => {
-      let prestamo = result.prestamos.find(p => p.id_prestamo === row.id_prestamo);
-
-      if (!prestamo) {
-        prestamo = {
-          id_prestamo: row.id_prestamo,
-          fecha_prestamo: row.fecha_prestamo,
-          fecha_devolucion: row.fecha_devolucion,
-          activos: []
-        };
-        result.prestamos.push(prestamo);
-      }
-
-      prestamo.activos.push({
-        id_activo: row.id_activo,
-        nombre: row.nombre_activo
-      });
-    });
-
-    res.json(result);
+    res.json(historial);
   });
 };
 
@@ -72,5 +47,5 @@ const getPrestamosByPersona = (req, res) => {
 module.exports = {
   getPersonas,
   createPersona,
-  getPrestamosByPersona
+  getHistorialPorPersona
 };

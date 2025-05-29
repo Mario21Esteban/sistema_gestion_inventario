@@ -56,13 +56,33 @@ const devolverPrestamo = (req, res) => {
   Prestamo.devolverPrestamo(id, (err, result) => {
     if (err) return res.status(500).json({ error: 'Error al devolver el préstamo' });
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensaje: 'Préstamo no encontrado o ya devuelto' });
+    if (result.prestamos.affectedRows === 0) {
+      return res.status(404).json({ mensaje: 'Préstamo no encontrado' });
     }
 
-    res.json({ mensaje: 'Préstamo devuelto correctamente', fecha_devolucion: new Date().toISOString().split('T')[0] });
+    res.json({
+      mensaje: 'Préstamo y activos devueltos correctamente',
+      fecha_devolucion_real: new Date().toISOString().split('T')[0]
+    });
   });
 };
+
+const getPrestamosPorActivo = (req, res) => {
+  const id = req.params.id;
+
+  Prestamo.getPrestamosPorActivo(id, (err, historial) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener préstamos del activo' });
+
+    if (historial.length === 0) {
+      return res.status(404).json({ mensaje: 'Este activo no tiene historial de préstamos' });
+    }
+
+    res.json(historial);
+  });
+};
+
+
+
 
 
 
@@ -70,5 +90,6 @@ module.exports = {
   getPrestamos,
   createPrestamo,
   getPrestamosAgrupados,
-  devolverPrestamo
+  devolverPrestamo,
+  getPrestamosPorActivo
 };

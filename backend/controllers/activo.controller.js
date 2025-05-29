@@ -89,29 +89,48 @@ const updateActivo = (req, res) => {
   });
 };
 
-const deleteActivo = (req, res) => {
+const darDeBajaActivo = (req, res) => {
   const id = req.params.id;
+  const { motivo } = req.body;
 
-  if (!id || isNaN(id)) {
-    return res.status(400).json({ error: 'ID no válido' });
+  if (!motivo) {
+    return res.status(400).json({ error: 'Debe proporcionar un motivo de baja' });
   }
 
-  Activo.deleteLogico(id, (err, result) => {
+  Activo.darDeBaja(id, motivo, (err, result) => {
     if (err) return res.status(500).json({ error: 'Error al dar de baja el activo' });
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ mensaje: 'Activo no encontrado' });
     }
 
-    res.json({ mensaje: 'Activo dado de baja correctamente' });
+    res.json({
+      mensaje: 'Activo dado de baja correctamente',
+      fecha_baja: new Date().toISOString().split('T')[0],
+      motivo
+    });
+  });
+};
+
+const getHistorialPrestamos = (req, res) => {
+  const id = req.params.id;
+
+  Activo.getHistorialPrestamos(id, (err, historial) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener historial del activo' });
+
+    if (historial.length === 0) {
+      return res.status(404).json({ mensaje: 'Este activo no tiene historial de préstamos' });
+    }
+
+    res.json(historial);
   });
 };
 
 
 
 
-// Controlador para manejar las operaciones relacionadas con los activos
-// Exportar los controladores
+
+
 module.exports = {
   getActivos,
   getActivoById,
@@ -120,6 +139,6 @@ module.exports = {
   createActivo,
   getActivosDisponibles,
   updateActivo,
-  deleteActivo
+  darDeBajaActivo,
+  getHistorialPrestamos
 };
-

@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { getPersonas, 
         createPersona, 
-        getPrestamosByPersona
+        getHistorialPorPersona
     } = require('../controllers/persona.controller');
 
-router.get('/:id/prestamos', getPrestamosByPersona);
+
+router.get('/:id/historial', getHistorialPorPersona);
 router.get('/', getPersonas);
 router.post('/', createPersona);
 
