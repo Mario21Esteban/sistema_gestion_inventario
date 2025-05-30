@@ -179,10 +179,68 @@ getHistorialPrestamos: (id_activo, callback) => {
     }
     callback(null, rows);
   });
-}
+},
 
+getActivosEnReparacion: (callback) => {
+  const sql = `
+    SELECT 
+      a.id_activo,
+      a.nombre,
+      a.descripcion,
+      a.nro_serie,
+      a.codigo,
+      a.año_adquisicion,
+      e.nombre_estado
+    FROM activos a
+    JOIN estado e ON a.estado_id = e.id_estado
+    WHERE a.estado_id = 3
+  `;
 
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('Error al obtener activos en reparación:', err);
+      return callback(err, null);
+    }
+    callback(null, rows);
+  });
+},
 
+enviarAReparacion: (id_activo, callback) => {
+  const sql = `
+    UPDATE activos
+    SET estado_id = 3
+    WHERE id_activo = ?
+  `;
+
+  db.query(sql, [id_activo], (err, result) => {
+    if (err) {
+      console.error('Error al enviar a reparación:', err);
+      return callback(err);
+    }
+    callback(null, result);
+  });
+},
+
+getUsoDelActivo: (id_activo, callback) => {
+  const sql = `
+    SELECT 
+      a.id_activo,
+      a.nombre,
+      COUNT(dp.id) AS total_prestamos
+    FROM activos a
+    LEFT JOIN detalle_prestamos dp ON a.id_activo = dp.activo_id
+    WHERE a.id_activo = ?
+    GROUP BY a.id_activo
+  `;
+
+  db.query(sql, [id_activo], (err, rows) => {
+    if (err) {
+      console.error('Error al obtener estadísticas de uso:', err);
+      return callback(err, null);
+    }
+    callback(null, rows[0]); // Devolvemos solo el objeto
+  });
+},
 
 };
 

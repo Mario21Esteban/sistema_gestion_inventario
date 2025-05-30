@@ -126,6 +126,46 @@ const getHistorialPrestamos = (req, res) => {
   });
 };
 
+const getActivosEnReparacion = (req, res) => {
+  Activo.getActivosEnReparacion((err, rows) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener activos en reparación' });
+
+    if (rows.length === 0) {
+      return res.status(200).json({ mensaje: 'No hay activos en reparación actualmente' });
+    }
+
+    res.json(rows);
+  });
+};
+
+const enviarAReparacion = (req, res) => {
+  const id = req.params.id;
+
+  Activo.enviarAReparacion(id, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar estado del activo' });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: 'Activo no encontrado' });
+    }
+
+    res.json({ mensaje: 'Activo enviado a reparación correctamente' });
+  });
+};
+
+const getUsoDelActivo = (req, res) => {
+  const id = req.params.id;
+
+  Activo.getUsoDelActivo(id, (err, data) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener estadísticas de uso' });
+
+    if (!data) {
+      return res.status(404).json({ mensaje: 'Activo no encontrado' });
+    }
+
+    res.json(data);
+  });
+};
+
 
 
 
@@ -140,5 +180,8 @@ module.exports = {
   getActivosDisponibles,
   updateActivo,
   darDeBajaActivo,
-  getHistorialPrestamos
+  getHistorialPrestamos,
+  getActivosEnReparacion,
+  enviarAReparacion,
+  getUsoDelActivo
 };

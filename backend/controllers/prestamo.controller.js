@@ -1,4 +1,5 @@
 const Prestamo = require('../models/prestamo.model');
+const db = require('../config/db');
 
 const getPrestamos = (req, res) => {
   Prestamo.getAll((err, data) => {
@@ -8,15 +9,46 @@ const getPrestamos = (req, res) => {
 };
 
 const createPrestamo = (req, res) => {
-  const data = req.body;
+  const { fecha_prestamo, fecha_devolucion, persona_id, activo_ids, observaciones } = req.body;
 
-  if (!data.fecha_prestamo || !data.fecha_devolucion || !data.persona_id) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios' });
+  // Validación básica
+  if (!fecha_prestamo || !fecha_devolucion || !persona_id || !Array.isArray(activo_ids) || activo_ids.length === 0) {
+    return res.status(400).json({ error: 'Debe completar todos los campos obligatorios y seleccionar al menos un activo' });
   }
 
-  Prestamo.create(data, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Error al registrar préstamo' });
-    res.status(201).json({ id_prestamo: result.insertId });
+  // Verificar disponibilidad
+  Prestamo.verificarDisponibilidadActivos(activo_ids, (err, ocupados) => {
+    if (err) return res.status(500).json({ error: 'Error al verificar disponibilidad' });
+
+    if (ocupados.length > 0) {
+      return res.status(400).json({
+        error: 'Uno o más activos ya están en uso y no pueden ser prestados',
+        activos_no_disponibles: ocupados
+      });
+    }
+
+    // Insertar préstamo
+    Prestamo.create({ fecha_prestamo, fecha_devolucion, persona_id, observaciones }, (err, result) => {
+      if (err) return res.status(500).json({ error: 'Error al registrar préstamo' });
+
+      const id_prestamo = result.insertId;
+      const values = activo_ids.map(id => [id_prestamo, id]);
+
+      const sqlDetalle = `
+        INSERT INTO detalle_prestamos (prestamo_id, activo_id)
+        VALUES ?
+      `;
+
+      db.query(sqlDetalle, [values], (err2) => {
+        if (err2) return res.status(500).json({ error: 'Error al registrar activos del préstamo' });
+
+        res.status(201).json({
+          mensaje: 'Préstamo registrado correctamente',
+          id_prestamo,
+          activos: activo_ids
+        });
+      });
+    });
   });
 };
 
@@ -35,7 +67,8 @@ const getPrestamosAgrupados = (req, res) => {
           persona: row.persona,
           fecha_prestamo: row.fecha_prestamo,
           fecha_devolucion: row.fecha_devolucion,
-          activos: []
+          activos: [],
+          observaciones: row.observaciones || null
         };
         agrupado.push(prestamo);
       }
@@ -81,6 +114,19 @@ const getPrestamosPorActivo = (req, res) => {
   });
 };
 
+const getPrestamosVencidos = (req, res) => {
+  Prestamo.getPrestamosVencidos((err, prestamos) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener préstamos vencidos' });
+
+    if (prestamos.length === 0) {
+      return res.status(200).json({ mensaje: 'No hay préstamos vencidos actualmente' });
+    }
+
+    res.json(prestamos);
+  });
+};
+
+
 
 
 
@@ -91,5 +137,6 @@ module.exports = {
   createPrestamo,
   getPrestamosAgrupados,
   devolverPrestamo,
-  getPrestamosPorActivo
+  getPrestamosPorActivo,
+  getPrestamosVencidos
 };

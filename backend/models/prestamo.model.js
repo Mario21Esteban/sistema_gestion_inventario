@@ -22,14 +22,16 @@ const Prestamo = {
     INSERT INTO prestamos (
       fecha_prestamo,
       fecha_devolucion,
-      persona_id
-    ) VALUES (?, ?, ?)
+      persona_id,
+      observaciones
+    ) VALUES (?, ?, ?, ?)
   `;
 
   const values = [
     prestamo.fecha_prestamo,
     prestamo.fecha_devolucion,
-    prestamo.persona_id
+    prestamo.persona_id,
+    prestamo.observaciones || null // Aseguramos que observaciones sea opcionalq
   ];
 
   db.query(sql, values, (err, result) => {
@@ -120,7 +122,52 @@ getPrestamosPorActivo: (id_activo, callback) => {
     }
     callback(null, rows);
   });
-}
+},
+
+verificarDisponibilidadActivos: (activoIds, callback) => {
+  const sql = `
+    SELECT dp.activo_id
+    FROM detalle_prestamos dp
+    JOIN prestamos p ON dp.prestamo_id = p.id_prestamo
+    WHERE dp.activo_id IN (?)
+      AND p.fecha_devolucion_real IS NULL
+  `;
+
+  db.query(sql, [activoIds], (err, rows) => {
+    if (err) {
+      console.error('Error al verificar disponibilidad:', err);
+      return callback(err, null);
+    }
+
+    const ocupados = rows.map(r => r.activo_id);
+    callback(null, ocupados);
+  });
+},
+
+getPrestamosVencidos: (callback) => {
+  const sql = `
+    SELECT 
+      p.id_prestamo,
+      p.fecha_prestamo,
+      p.fecha_devolucion,
+      per.nombre AS nombre_persona,
+      per.correo
+    FROM prestamos p
+    JOIN persona per ON p.persona_id = per.id_persona
+    WHERE p.fecha_devolucion < CURDATE()
+      AND p.fecha_devolucion_real IS NULL
+    ORDER BY p.fecha_devolucion ASC
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('Error al obtener préstamos vencidos:', err);
+      return callback(err, null);
+    }
+    callback(null, rows);
+  });
+},
+
 
 
 

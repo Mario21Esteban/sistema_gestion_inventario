@@ -9,18 +9,25 @@ const {
   getActivosDisponibles,
   updateActivo,
   darDeBajaActivo,
-  getHistorialPrestamos
+  getHistorialPrestamos,
+  getActivosEnReparacion,
+  enviarAReparacion,
+  getUsoDelActivo
 } = require('../controllers/activo.controller');
 
 router.get('/', getActivos);
 router.get('/disponibles', getActivosDisponibles);
+router.get('/reparacion', getActivosEnReparacion);
+router.post('/', createActivo);
 router.put('/:id/baja', darDeBajaActivo);
 router.get('/:id/historial', getHistorialPrestamos);
 router.put('/:id', updateActivo);
 router.get('/codigo/:codigo', getActivoByCodigo);
 router.get('/serie/:nro_serie', getActivoBySerie);
-router.post('/', createActivo);
 router.get('/:id', getActivoById);
+router.put('/:id/reparacion', enviarAReparacion);
+router.get('/:id/uso', getUsoDelActivo);
+
 
 
 
