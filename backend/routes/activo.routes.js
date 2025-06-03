@@ -12,11 +12,15 @@ const {
   getHistorialPrestamos,
   getActivosEnReparacion,
   enviarAReparacion,
-  getUsoDelActivo
+  getUsoDelActivo,
+  getActivosDadosDeBaja
 } = require('../controllers/activo.controller');
 
+
+// Rutas para manejar los activos
 router.get('/', getActivos);
 router.get('/disponibles', getActivosDisponibles);
+router.get('/baja', getActivosDadosDeBaja);
 router.get('/reparacion', getActivosEnReparacion);
 router.post('/', createActivo);
 router.put('/:id/baja', darDeBajaActivo);

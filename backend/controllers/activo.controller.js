@@ -166,6 +166,12 @@ const getUsoDelActivo = (req, res) => {
   });
 };
 
+const getActivosDadosDeBaja = (req, res) => {
+  Activo.getActivosDadosDeBaja((err, data) => {
+    if (err) return res.status(500).json({ error: "Error al obtener activos dados de baja" });
+    res.json(data);
+  });
+};
 
 
 
@@ -183,5 +189,6 @@ module.exports = {
   getHistorialPrestamos,
   getActivosEnReparacion,
   enviarAReparacion,
-  getUsoDelActivo
+  getUsoDelActivo,
+  getActivosDadosDeBaja
 };

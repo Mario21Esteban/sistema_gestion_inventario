@@ -242,6 +242,11 @@ getUsoDelActivo: (id_activo, callback) => {
   });
 },
 
+getActivosDadosDeBaja: (callback) => {
+  db.query("SELECT * FROM activos WHERE estado_id = 2", callback);
+}
+
+
 };
 
 module.exports = Activo;
