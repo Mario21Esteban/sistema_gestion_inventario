@@ -11,6 +11,8 @@ import HistorialPersona from "../pages/HistorialPersona";
 import ActivosReparacion from "../pages/ActivosReparacion";
 import ActivosBaja from "../pages/ActivosBaja";
 import HistorialPorActivo from "../pages/HistorialPorActivo";
+import Facturas from "../pages/Facturas";
+import Ubicaciones from "../pages/Ubicaciones";
 
 
 
@@ -30,6 +32,8 @@ function AppRouter() {
         <Route path="/activos/reparacion" element={<ActivosReparacion />} />
         <Route path="/activos/baja" element={<ActivosBaja />} />
         <Route path="/prestamos/activos/historial/:id" element={<HistorialPorActivo />} />
+        <Route path="/facturas" element={<Facturas />} />
+        <Route path="/ubicaciones" element={<Ubicaciones />} />
   
         {/* Agregar más rutas según sea necesario */}
       </Routes>

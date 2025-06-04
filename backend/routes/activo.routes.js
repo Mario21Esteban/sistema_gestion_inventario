@@ -15,6 +15,8 @@ const {
   getUsoDelActivo,
   getActivosDadosDeBaja
 } = require('../controllers/activo.controller');
+const upload = require("../middleware/upload");
+
 
 
 // Rutas para manejar los activos
@@ -23,6 +25,7 @@ router.get('/disponibles', getActivosDisponibles);
 router.get('/baja', getActivosDadosDeBaja);
 router.get('/reparacion', getActivosEnReparacion);
 router.post('/', createActivo);
+router.post("/", upload.single("foto"), createActivo);
 router.put('/:id/baja', darDeBajaActivo);
 router.get('/:id/historial', getHistorialPrestamos);
 router.put('/:id', updateActivo);

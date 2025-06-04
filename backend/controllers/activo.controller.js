@@ -1,5 +1,6 @@
 const Activo = require('../models/activo.model');
 
+
 const getActivos = (req, res) => {
   Activo.getAll((err, data) => {
     if (err) {
@@ -45,6 +46,9 @@ const getActivoBySerie = (req, res) => {
 
 const createActivo = (req, res) => {
   const data = req.body;
+
+  data.foto = req.file ? req.file.filename : "pendiente";
+
 
   const camposObligatorios = [
     'nombre', 'codigo', 'nro_serie', 'categoria',

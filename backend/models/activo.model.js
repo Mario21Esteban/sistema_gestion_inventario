@@ -57,7 +57,7 @@ create: (activo, callback) => {
   const values = [
     activo.nombre,
     activo.descripcion,
-    activo.foto,
+    activo.foto || "pendiente" ,
     activo.costo,
     activo.año_adquisicion,
     activo.nro_serie,
