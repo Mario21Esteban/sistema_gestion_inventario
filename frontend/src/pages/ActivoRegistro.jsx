@@ -1,142 +1,152 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import FacturaModal from "./FacturaModal";
 
-const ActivoRegistro = () => {
+function ActivoRegistro() {
   const [formData, setFormData] = useState({
-    nombre: '',
-    descripcion: '',
-    costo: '',
-    año_adquisicion: '',
-    nro_serie: '',
-    codigo: '',
-    categoria: 'mobiliario',
-    observaciones: '',
-    ubicacion_id: '',
-    factura_id: '',
-    estado_id: 1 // por defecto: en uso
+    nombre: "",
+    descripcion: "",
+    costo: "",
+    año_adquisicion: "",
+    nro_serie: "",
+    codigo: "",
+    categoria: "",
+    observaciones: "",
+    ubicacion_id: "",
+    factura_id: "",
+    estado_id: 1,
   });
 
   const [facturas, setFacturas] = useState([]);
   const [ubicaciones, setUbicaciones] = useState([]);
-  const [imagen, setImagen] = useState(null); // Para el archivo
+  const [mensaje, setMensaje] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:4000/api/facturas')
-      .then(res => setFacturas(res.data))
-      .catch(err => console.error('Error cargando facturas', err));
-
-    axios.get('http://localhost:4000/api/ubicaciones')
-      .then(res => setUbicaciones(res.data))
-      .catch(err => console.error('Error cargando ubicaciones', err));
+    cargarDatos();
   }, []);
 
-  const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const cargarDatos = async () => {
+    try {
+      const [resFacturas, resUbicaciones] = await Promise.all([
+        axios.get("http://localhost:4000/api/factura"),
+        axios.get("http://localhost:4000/api/ubicaciones"),
+      ]);
+      setFacturas(resFacturas.data);
+      setUbicaciones(resUbicaciones.data);
+    } catch (err) {
+      console.error("Error cargando datos:", err);
+    }
   };
 
-  const handleFileChange = e => {
-    setImagen(e.target.files[0]);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async e => {
+  const onFacturaRegistrada = async (idFactura) => {
+    await cargarDatos(); // Refresca lista de facturas
+    setFormData(prev => ({ ...prev, factura_id: idFactura }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMensaje("");
 
-    const data = new FormData();
+    const camposObligatorios = [
+      "nombre", "costo", "año_adquisicion", "nro_serie",
+      "codigo", "categoria", "ubicacion_id", "factura_id"
+    ];
 
-    // Adjunta campos normales
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
-    });
-
-    // Adjunta imagen solo si existe
-    if (imagen) {
-      data.append('foto', imagen);
+    for (const campo of camposObligatorios) {
+      if (!formData[campo]) {
+        setMensaje(`❌ El campo "${campo}" es obligatorio`);
+        return;
+      }
     }
 
     try {
-      await axios.post('http://localhost:4000/api/activos', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const activoData = {
+        ...formData,
+        costo: parseFloat(formData.costo),
+        factura_id: parseInt(formData.factura_id),
+      };
 
-      alert('Activo registrado correctamente');
+      await axios.post("http://localhost:4000/api/activos", activoData);
+      setMensaje("✅ Activo registrado correctamente.");
+
       setFormData({
-        nombre: '',
-        descripcion: '',
-        costo: '',
-        año_adquisicion: '',
-        nro_serie: '',
-        codigo: '',
-        categoria: 'mobiliario',
-        observaciones: '',
-        ubicacion_id: '',
-        factura_id: '',
-        estado_id: 1
+        nombre: "",
+        descripcion: "",
+        foto: "pendiente",
+        costo: "",
+        año_adquisicion: "",
+        nro_serie: "",
+        codigo: "",
+        categoria: "",
+        observaciones: "",
+        ubicacion_id: "",
+        factura_id: "",
+        estado_id: 1,
       });
-      setImagen(null);
 
-    } catch (error) {
-      console.error('Error al registrar activo:', error);
-      alert('Hubo un error al registrar el activo');
+    } catch (err) {
+      console.error(err);
+      setMensaje("❌ Error al registrar el activo.");
     }
   };
 
   return (
-    <div className="p-6 max-w-xl mx-auto bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Registrar Activo</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="container mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Registrar Activo</h2>
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
 
-        <input type="text" name="nombre" placeholder="Nombre" className="input" onChange={handleChange} value={formData.nombre} required />
+        <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Nombre" required className="input" />
+        <input type="text" name="descripcion" value={formData.descripcion} onChange={handleChange} placeholder="Descripción" className="input" />
+        <input type="number" name="costo" value={formData.costo} onChange={handleChange} placeholder="Costo" min="0" step="0.01" className="input" />
+        <input type="number" name="año_adquisicion" value={formData.año_adquisicion} onChange={handleChange} placeholder="Año de adquisición" min="1950" max={new Date().getFullYear()} className="input" />
+        <input type="text" name="nro_serie" value={formData.nro_serie} onChange={handleChange} placeholder="N° de Serie" className="input" />
+        <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} placeholder="Código Interno" className="input" />
 
-        <textarea name="descripcion" placeholder="Descripción" className="input" onChange={handleChange} value={formData.descripcion}></textarea>
-
-        <input type="number" name="costo" placeholder="Costo" className="input" onChange={handleChange} value={formData.costo} min="0" required />
-
-        <input type="number" name="año_adquisicion" placeholder="Año de Adquisición" className="input" onChange={handleChange} value={formData.año_adquisicion} min="1900" max="2100" required />
-
-        <input type="text" name="nro_serie" placeholder="Número de serie" className="input" onChange={handleChange} value={formData.nro_serie} required />
-
-        <input type="text" name="codigo" placeholder="Código" className="input" onChange={handleChange} value={formData.codigo} required />
-
-        <select name="categoria" className="input" onChange={handleChange} value={formData.categoria} required>
+        <select name="categoria" value={formData.categoria} onChange={handleChange} className="input">
+          <option value="">Categoría</option>
           <option value="mobiliario">Mobiliario</option>
           <option value="tecnologico">Tecnológico</option>
         </select>
 
-        <textarea name="observaciones" placeholder="Observaciones" className="input" onChange={handleChange} value={formData.observaciones}></textarea>
+        <textarea name="observaciones" value={formData.observaciones} onChange={handleChange} placeholder="Observaciones" className="input" />
 
-        <select name="ubicacion_id" className="input" onChange={handleChange} value={formData.ubicacion_id} required>
-          <option value="">Seleccionar ubicación</option>
-          {ubicaciones.map(u => (
+        <select name="ubicacion_id" value={formData.ubicacion_id} onChange={handleChange} className="input">
+          <option value="">Ubicación</option>
+          {ubicaciones.map((u) => (
             <option key={u.id_ubicacion} value={u.id_ubicacion}>{u.nombre}</option>
           ))}
         </select>
 
-        <select name="factura_id" className="input" onChange={handleChange} value={formData.factura_id} required>
-          <option value="">Seleccionar factura</option>
-          {facturas.map(f => (
-            <option key={f.id_factura} value={f.id_factura}>{f.nro_factura}</option>
-          ))}
-        </select>
+        <div className="flex gap-2 col-span-2 items-center">
+          <select name="factura_id" value={formData.factura_id} onChange={handleChange} className="input w-full">
+            <option value="">Seleccionar factura</option>
+            {facturas.map((f) => (
+              <option key={f.id_factura} value={f.id_factura}>{f.nro_factura}</option>
+            ))}
+          </select>
+          <button type="button" onClick={() => setIsModalOpen(true)} className="text-sm text-blue-600 underline">+ Nueva factura</button>
+        </div>
 
-        {/* Campo opcional para imagen */}
-        <div>
-  <label className="block text-sm font-medium text-gray-700">Imagen (opcional)</label>
-  <input
-    type="file"
-    name="foto"
-    accept="image/*"
-    onChange={handleFileChange}
-    className="block w-full mt-1 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-  />
-</div>
-
-
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Registrar</button>
+        <div className="col-span-2 text-center mt-2">
+          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded">Registrar Activo</button>
+        </div>
       </form>
+
+      {mensaje && <p className="mt-4 text-sm text-center">{mensaje}</p>}
+
+      <FacturaModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onFacturaRegistrada={onFacturaRegistrada}
+      />
     </div>
   );
-};
+}
 
 export default ActivoRegistro;
