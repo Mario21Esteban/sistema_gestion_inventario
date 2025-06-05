@@ -22,7 +22,22 @@ const Factura = {
     }
     callback(null, results);
   });
-}
+},
+
+  getById: (id, callback) => {
+    const sql = 'SELECT * FROM factura WHERE id_factura = ?';
+    db.query(sql, [id], (err, results) => {
+      if (err) {
+        console.error('Error al obtener factura por ID:', err);
+        return callback(err, null);
+      }
+      if (results.length === 0) {
+        return callback(null, null); // No se encontró la factura
+      }
+      callback(null, results[0]);
+    });
+  }
+
 };
 
 module.exports = Factura;

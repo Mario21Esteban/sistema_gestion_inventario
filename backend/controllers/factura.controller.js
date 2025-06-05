@@ -20,8 +20,16 @@ const getFacturas = (req, res) => {
   });
 };
 
+const getFacturaById = (req, res) => {
+  Factura.getById(req.params.id, (err, data) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener factura' });
+    res.json(data);
+  });
+};
+
 
 module.exports = {
   createFactura,
-  getFacturas
+  getFacturas,
+  getFacturaById
 };

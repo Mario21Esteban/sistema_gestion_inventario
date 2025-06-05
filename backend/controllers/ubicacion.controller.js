@@ -9,6 +9,17 @@ const getUbicaciones = (req, res) => {
   });
 };
 
+const getUbicacionById = (req, res) => {
+  const id = req.params.id;
+  Ubicacion.getById(id, (err, ubicacion) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener la ubicación' });
+    if (!ubicacion) return res.status(404).json({ error: 'Ubicación no encontrada' });
+    res.json(ubicacion);
+  });
+}
+
 module.exports = {
-  getUbicaciones
+  getUbicaciones,
+  getUbicacionById
+
 };

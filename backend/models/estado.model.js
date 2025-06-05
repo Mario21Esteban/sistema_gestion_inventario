@@ -9,7 +9,20 @@ const Estado = {
       }
       callback(null, results);
     });
-  }
+  },
+
+  getById: (id, callback) => {
+  const sql = 'SELECT * FROM estado WHERE id_estado = ?';
+  db.query(sql, [id], (err, rows) => {
+    if (err) return callback(err);
+    callback(null, rows[0]);
+  });
+},
+
+
+
 };
+
+
 
 module.exports = Estado;

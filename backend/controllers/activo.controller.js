@@ -47,9 +47,6 @@ const getActivoBySerie = (req, res) => {
 const createActivo = (req, res) => {
   const data = req.body;
 
-  data.foto = req.file ? req.file.filename : "pendiente";
-
-
   const camposObligatorios = [
     'nombre', 'codigo', 'nro_serie', 'categoria',
     'ubicacion_id', 'factura_id', 'estado_id'

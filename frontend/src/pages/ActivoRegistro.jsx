@@ -6,6 +6,7 @@ function ActivoRegistro() {
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
+    foto: "",
     costo: "",
     año_adquisicion: "",
     nro_serie: "",
@@ -107,6 +108,25 @@ function ActivoRegistro() {
         <input type="number" name="año_adquisicion" value={formData.año_adquisicion} onChange={handleChange} placeholder="Año de adquisición" min="1950" max={new Date().getFullYear()} className="input" />
         <input type="text" name="nro_serie" value={formData.nro_serie} onChange={handleChange} placeholder="N° de Serie" className="input" />
         <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} placeholder="Código Interno" className="input" />
+
+        <input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData((prev) => ({ ...prev, foto: reader.result }));
+      };
+      reader.readAsDataURL(file); // convierte a base64
+    }
+  }}
+  className="input col-span-2"
+/>
+
+
+
 
         <select name="categoria" value={formData.categoria} onChange={handleChange} className="input">
           <option value="">Categoría</option>
