@@ -63,7 +63,57 @@ getHistorialPrestamos: (id_persona, callback) => {
       }
       callback(null, rows);
     });
-  }
+  },
+
+  registroBasico: (persona, callback) => {
+  const sql = `
+    INSERT INTO persona (
+      nombre, cargo, correo, telefono,
+      usuario, contraseña, rol_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    persona.nombre,
+    persona.cargo,
+    persona.correo,
+    persona.telefono,
+    persona.usuario || "No especificado",
+    persona.contraseña,
+    2 // rol fijo para usuarios registrados desde el sistema
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Error al registrar usuario:', err);
+      return callback(err, null);
+    }
+    callback(null, { insertId: result.insertId });
+  });
+},
+
+getByCredenciales: (correo, contraseña, callback) => {
+  const sql = `
+    SELECT id_persona, nombre, correo, rol_id
+    FROM persona
+    WHERE correo = ? AND contraseña = ?
+    LIMIT 1
+  `;
+
+  db.query(sql, [correo, contraseña], (err, rows) => {
+    if (err) {
+      console.error("Error al buscar persona:", err);
+      return callback(err, null);
+    }
+
+    if (rows.length === 0) {
+      return callback(null, null); // Credenciales inválidas
+    }
+
+    callback(null, rows[0]);
+  });
+},
+
 
 
 };

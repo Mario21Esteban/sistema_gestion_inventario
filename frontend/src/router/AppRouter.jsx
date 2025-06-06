@@ -1,18 +1,21 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Home from "../pages/Home";
-import Activos from "../pages/Activos";
-import Personas from "../pages/Personas";
-import Prestamos from "../pages/Prestamos";
-import ActivoRegistro from "../pages/ActivoRegistro";
-import ActivosDisponibles from "../pages/ActivosDisponibles";
-import ActivoDetalle from "../pages/ActivoDetalle";
-import HistorialPersona from "../pages/HistorialPersona";
-import ActivosReparacion from "../pages/ActivosReparacion";
-import ActivosBaja from "../pages/ActivosBaja";
-import HistorialPorActivo from "../pages/HistorialPorActivo";
-import Facturas from "../pages/Facturas";
-import Ubicaciones from "../pages/Ubicaciones";
+import {
+  Home,
+  Activos,
+  Personas,
+  Prestamos,
+  ActivoRegistro,
+  ActivosDisponibles,
+  ActivoDetalle,
+  HistorialPersona,
+  ActivosReparacion,
+  ActivosBaja,
+  HistorialPorActivo,
+  Facturas,
+  Ubicaciones,
+  UsuarioActivosDisponibles
+} from "../pages";
 
 
 
@@ -34,6 +37,8 @@ function AppRouter() {
         <Route path="/prestamos/activos/historial/:id" element={<HistorialPorActivo />} />
         <Route path="/facturas" element={<Facturas />} />
         <Route path="/ubicaciones" element={<Ubicaciones />} />
+        <Route path="/usuario/activos-disponibles" element={<UsuarioActivosDisponibles />} />
+
   
         {/* Agregar más rutas según sea necesario */}
       </Routes>
