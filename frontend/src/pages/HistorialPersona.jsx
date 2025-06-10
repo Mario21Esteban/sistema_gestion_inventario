@@ -1,45 +1,52 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function HistorialPersona() {
-  const { id } = useParams();
-  const [historial, setHistorial] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [prestamos, setPrestamos] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-  axios.get(`http://localhost:4000/api/personas/${id}/historial`)
-    .then(res => {
-      console.log("Respuesta del historial:", res.data);  // 👈
-      setHistorial(res.data);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error("Error al obtener historial:", err);
-      setLoading(false);
-    });
-}, [id]);
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario) {
+      navigate("/"); // seguridad si accede sin login
+      return;
+    }
 
-
-  if (loading) return <p className="p-4">Cargando historial...</p>;
+    axios.get(`http://localhost:4000/api/personas/${usuario.id_persona}/historial`)
+      .then(res => setPrestamos(res.data))
+      .catch(err => console.error("Error al obtener historial:", err));
+  }, [navigate]);
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Historial de Préstamos</h2>
-      {historial.length === 0 ? (
-        <p>No hay préstamos registrados para esta persona.</p>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Historial de Préstamos</h2>
+
+      {prestamos.length === 0 ? (
+        <p>No hay préstamos registrados.</p>
       ) : (
-        historial.map((item, index) => (
-          <div key={index} className="mb-4 border rounded p-4 bg-gray-100">
-            <p><strong>Activo:</strong> {item.nombre_activo}</p>
-            <p><strong>Fecha Préstamo:</strong> {item.fecha_prestamo}</p>
-            <p><strong>Fecha Estimada Devolución:</strong> {item.fecha_devolucion}</p>
-            {item.fecha_devolucion_real && (
-              <p><strong>Fecha Real Devolución:</strong> {item.fecha_devolucion_real}</p>
-            )}
-          </div>
-        ))
+        <ul className="space-y-4">
+          {prestamos.map((prestamo, index) => (
+            <li key={index} className="border p-4 rounded bg-gray-50">
+              <p><strong>Activo:</strong> {prestamo.nombre_activo}</p>
+              <p><strong>Código:</strong> {prestamo.codigo}</p>
+              <p><strong>Nro. Serie:</strong> {prestamo.nro_serie}</p>
+              <p><strong>Fecha Préstamo:</strong> {prestamo.fecha_prestamo.slice(0, 10)}</p>
+              <p><strong>Fecha Estimada Devolución:</strong> {prestamo.fecha_devolucion.slice(0, 10)}</p>
+              <p><strong>Fecha Real Devolución:</strong> {prestamo.fecha_devolucion_real ? prestamo.fecha_devolucion_real.slice(0, 10) : "Sin devolver"}</p>
+            </li>
+          ))}
+        </ul>
       )}
+
+      <div className="mt-6">
+        <button
+          onClick={() => navigate("/usuario/perfil")}
+          className="bg-gray-500 text-white px-4 py-2 rounded"
+        >
+          ← Volver al perfil
+        </button>
+      </div>
     </div>
   );
 }

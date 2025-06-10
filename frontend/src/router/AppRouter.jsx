@@ -1,5 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import RutaProtegida from "../components/RutaProtegida";
+
+
 import {
   Home,
   Activos,
@@ -14,7 +17,8 @@ import {
   HistorialPorActivo,
   Facturas,
   Ubicaciones,
-  UsuarioActivosDisponibles
+  UsuarioActivosDisponibles,
+  UsuarioPerfil
 } from "../pages";
 
 
@@ -31,13 +35,15 @@ function AppRouter() {
         <Route path="/activos/registro" element={<ActivoRegistro />} />
         <Route path="/activos/disponibles" element={<ActivosDisponibles />} />
         <Route path="/activos/:id" element={<ActivoDetalle />} />
-        <Route path="/personas/:id/historial" element={<HistorialPersona />} />
+        <Route path="/usuario/historial" element={<HistorialPersona />} />
         <Route path="/activos/reparacion" element={<ActivosReparacion />} />
         <Route path="/activos/baja" element={<ActivosBaja />} />
         <Route path="/prestamos/activos/historial/:id" element={<HistorialPorActivo />} />
         <Route path="/facturas" element={<Facturas />} />
         <Route path="/ubicaciones" element={<Ubicaciones />} />
         <Route path="/usuario/activos-disponibles" element={<UsuarioActivosDisponibles />} />
+        <Route path="/usuario/perfil" element={<UsuarioPerfil />} />
+
 
   
         {/* Agregar más rutas según sea necesario */}

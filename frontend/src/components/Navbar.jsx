@@ -17,10 +17,7 @@ function Navbar() {
             <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/personas">Personas</Link>
             <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/prestamos">Préstamos</Link>
             <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/activos/registro">Registrar Activo</Link>
-            <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/activos/disponibles">Activos Disponibles</Link>
-            <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/activos/1333">Detalle Activo</Link>
             <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/personas/1/historial">Historial Persona</Link>
-            <Link className="hover:bg-green-800 px-3 py-2 rounded transition" to="/activos/reparacion">Activos en Reparación</Link>
           </div>
           <div className="md:hidden flex items-center">
             <button
@@ -44,10 +41,7 @@ function Navbar() {
           <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/personas" onClick={() => setOpen(false)}>Personas</Link>
           <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/prestamos" onClick={() => setOpen(false)}>Préstamos</Link>
           <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/activos/registro" onClick={() => setOpen(false)}>Registrar Activo</Link>
-          <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/activos/disponibles" onClick={() => setOpen(false)}>Activos Disponibles</Link>
-          <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/activos/1333" onClick={() => setOpen(false)}>Detalle Activo</Link>
           <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/personas/1/historial" onClick={() => setOpen(false)}>Historial Persona</Link>
-          <Link className="block px-3 py-2 rounded hover:bg-green-800 transition" to="/activos/reparacion" onClick={() => setOpen(false)}>Activos en Reparación</Link>
         </div>
       )}
     </nav>

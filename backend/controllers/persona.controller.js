@@ -22,8 +22,14 @@ const createPersona = (req, res) => {
   }
 
   Persona.create(data, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Error al registrar persona' });
-    res.status(201).json({ id_persona: result.insertId });
+    if (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({ error: 'Este correo ya está registrado.' });
+      }
+      return res.status(500).json({ error: 'Error al registrar usuario.' });
+    }
+
+    res.status(201).json({ mensaje: 'Usuario registrado correctamente', id: result.insertId });
   });
 };
 

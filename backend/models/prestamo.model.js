@@ -124,25 +124,24 @@ getPrestamosPorActivo: (id_activo, callback) => {
   });
 },
 
-verificarDisponibilidadActivos: (activoIds, callback) => {
+verificarDisponibilidadActivos: (ids, callback) => {
   const sql = `
-    SELECT dp.activo_id
-    FROM detalle_prestamos dp
-    JOIN prestamos p ON dp.prestamo_id = p.id_prestamo
-    WHERE dp.activo_id IN (?)
-      AND p.fecha_devolucion_real IS NULL
+    SELECT a.id_activo
+    FROM activos a
+    LEFT JOIN detalle_prestamos dp ON a.id_activo = dp.activo_id
+    LEFT JOIN prestamos p ON dp.prestamo_id = p.id_prestamo AND p.fecha_devolucion_real IS NULL
+    WHERE a.id_activo IN (?)
+      AND (a.estado_id != 1 OR p.id_prestamo IS NOT NULL)
   `;
 
-  db.query(sql, [activoIds], (err, rows) => {
-    if (err) {
-      console.error('Error al verificar disponibilidad:', err);
-      return callback(err, null);
-    }
+  db.query(sql, [ids], (err, rows) => {
+    if (err) return callback(err, null);
 
-    const ocupados = rows.map(r => r.activo_id);
-    callback(null, ocupados);
+    const activosNoDisponibles = rows.map(r => r.id_activo);
+    callback(null, activosNoDisponibles);
   });
 },
+
 
 getPrestamosVencidos: (callback) => {
   const sql = `

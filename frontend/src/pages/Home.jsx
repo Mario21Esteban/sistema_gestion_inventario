@@ -15,25 +15,30 @@ function Home() {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setMensaje("");
+  e.preventDefault();
+  setMensaje("");
 
-    try {
-      const res = await axios.post("http://localhost:4000/api/personas/login", credenciales);
-      const persona = res.data;
+  try {
+    const res = await axios.post("http://localhost:4000/api/personas/login", credenciales);
+    const persona = res.data;
 
-      if (persona.rol_id === 1) {
-        navigate("/activos"); // Vista de administrador
-      } else if (persona.rol_id === 2) {
-        navigate("/usuario/activos-disponibles"); // Vista de usuario común
-      } else {
-        setMensaje("⚠️ Rol no autorizado.");
-      }
-    } catch (err) {
-      console.error("Error en login:", err);
-      setMensaje("❌ Credenciales inválidas.");
+    // 👉 Guardar datos del usuario en localStorage
+    localStorage.setItem("usuario", JSON.stringify(persona));
+
+    // Redireccionar según el rol
+    if (persona.rol_id === 1) {
+      navigate("/activos");
+    } else if (persona.rol_id === 2) {
+  navigate("/usuario/perfil");
+} else {
+      setMensaje("⚠️ Rol no autorizado.");
     }
-  };
+  } catch (err) {
+    console.error("Error en login:", err);
+    setMensaje("❌ Credenciales inválidas.");
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
@@ -72,7 +77,7 @@ function Home() {
             onClick={() => setMostrarRegistro(true)}
             className="text-blue-600 text-sm underline mt-1"
           >
-            Regístrate aquí
+            👉🏽Ingresa tus datos👈🏽
           </button>
         </div>
       </div>

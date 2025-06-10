@@ -35,7 +35,11 @@ function RegistroUsuarioModal({ isOpen, onClose }) {
       });
     } catch (err) {
       console.error(err);
-      setMensaje("❌ Error al registrar usuario.");
+  if (err.response?.data?.error) {
+    setMensaje(`❌ ${err.response.data.error}`);
+  } else {
+    setMensaje("❌ Error al registrar usuario.");
+  }
     }
   };
 

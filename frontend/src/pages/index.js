@@ -13,3 +13,4 @@ export { default as HistorialPorActivo } from "./HistorialPorActivo";
 export { default as Facturas } from "./Facturas";
 export { default as Ubicaciones } from "./Ubicaciones";
 export { default as UsuarioActivosDisponibles } from "./UsuarioActivosDisponibles";
+export { default as UsuarioPerfil } from "./UsuarioPerfil";

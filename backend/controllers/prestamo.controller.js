@@ -1,12 +1,14 @@
 const Prestamo = require('../models/prestamo.model');
 const db = require('../config/db');
 
+
 const getPrestamos = (req, res) => {
   Prestamo.getAll((err, data) => {
     if (err) return res.status(500).json({ error: 'Error al obtener préstamos' });
     res.json(data);
   });
 };
+
 
 const createPrestamo = (req, res) => {
   const { fecha_prestamo, fecha_devolucion, persona_id, activo_ids, observaciones } = req.body;
@@ -52,6 +54,7 @@ const createPrestamo = (req, res) => {
   });
 };
 
+
 const getPrestamosAgrupados = (req, res) => {
   Prestamo.getDetalleAgrupado((err, rows) => {
     if (err) return res.status(500).json({ error: 'Error en la consulta' });
@@ -83,7 +86,8 @@ const getPrestamosAgrupados = (req, res) => {
   });
 };
 
-const devolverPrestamo = (req, res) => {
+
+/*const devolverPrestamo = (req, res) => {
   const id = req.params.id;
 
   Prestamo.devolverPrestamo(id, (err, result) => {
@@ -98,7 +102,8 @@ const devolverPrestamo = (req, res) => {
       fecha_devolucion_real: new Date().toISOString().split('T')[0]
     });
   });
-};
+};*/
+
 
 const getPrestamosPorActivo = (req, res) => {
   const id = req.params.id;
@@ -114,6 +119,7 @@ const getPrestamosPorActivo = (req, res) => {
   });
 };
 
+
 const getPrestamosVencidos = (req, res) => {
   Prestamo.getPrestamosVencidos((err, prestamos) => {
     if (err) return res.status(500).json({ error: 'Error al obtener préstamos vencidos' });
@@ -127,6 +133,73 @@ const getPrestamosVencidos = (req, res) => {
 };
 
 
+const marcarPrestamoComoDevuelto = (req, res) => {
+  const id = req.params.id;
+
+  const sql = `
+    UPDATE prestamos
+    SET estado_devolucion = 'pendiente'
+    WHERE id_prestamo = ?
+  `;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("Error al marcar devolución pendiente:", err);
+      return res.status(500).json({ error: "Error al registrar devolución" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: "Préstamo no encontrado" });
+    }
+
+    res.json({ mensaje: "Solicitud de devolución registrada y pendiente de validación." });
+  });
+};
+
+
+const getDevolucionesPendientes = (req, res) => {
+  const sql = `
+    SELECT p.id_prestamo, p.fecha_prestamo, p.fecha_devolucion, per.nombre AS persona
+    FROM prestamos p
+    JOIN persona per ON per.id_persona = p.persona_id
+    WHERE p.estado_devolucion = 'pendiente'
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error("Error al consultar devoluciones pendientes:", err);
+      return res.status(500).json({ error: "Error al obtener devoluciones pendientes" });
+    }
+
+    res.json(rows);
+  });
+};
+
+const validarDevolucion = (req, res) => {
+  const id = req.params.id;
+  const fecha = new Date().toISOString().split("T")[0];
+
+  const sql = `
+    UPDATE prestamos
+    SET fecha_devolucion_real = ?, estado_devolucion = 'validado'
+    WHERE id_prestamo = ?
+  `;
+
+  db.query(sql, [fecha, id], (err, result) => {
+    if (err) {
+      console.error("Error al validar devolución:", err);
+      return res.status(500).json({ error: "Error al validar devolución" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: "Préstamo no encontrado" });
+    }
+
+    res.json({ mensaje: "Devolución validada correctamente", fecha_devolucion_real: fecha });
+  });
+};
+
+
 
 
 
@@ -136,7 +209,10 @@ module.exports = {
   getPrestamos,
   createPrestamo,
   getPrestamosAgrupados,
-  devolverPrestamo,
+  // devolverPrestamo, // Comentado porque se reemplazó por marcarPrestamoComoDevuelto
   getPrestamosPorActivo,
-  getPrestamosVencidos
+  getPrestamosVencidos,
+  marcarPrestamoComoDevuelto,
+  getDevolucionesPendientes,
+  validarDevolucion
 };
