@@ -1,4 +1,5 @@
 const Activo = require('../models/activo.model');
+const db = require('../config/db.js');
 
 
 const getActivos = (req, res) => {
@@ -174,6 +175,46 @@ const getActivosDadosDeBaja = (req, res) => {
   });
 };
 
+const getActivosPorCategoria = (req, res) => {
+  const { categoria } = req.params;
+
+  const sql = `SELECT * FROM activos WHERE categoria = ?`;
+
+  db.query(sql, [categoria], (err, rows) => {
+    if (err) {
+      console.error("Error al obtener activos por categoría:", err);
+      return res.status(500).json({ error: "Error al obtener activos por categoría" });
+    }
+    res.json(rows);
+  });
+};
+
+const buscarActivos = (req, res) => {
+  const { termino } = req.params;
+  const likeTerm = `%${termino}%`;
+
+  const sql = `
+    SELECT * FROM activos
+    WHERE codigo LIKE ? OR nro_serie LIKE ?
+  `;
+
+  db.query(sql, [likeTerm, likeTerm], (err, rows) => {
+    if (err) {
+      console.error("Error al buscar activos:", err);
+      return res.status(500).json({ error: "Error al buscar activos" });
+    }
+    res.json(rows);
+  });
+};
+
+const getActivosMasPrestados = (req, res) => {
+  Activo.getActivosMasPrestados((err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener los activos más prestados" });
+    }
+    res.json(data);
+  });
+};
 
 
 
@@ -191,5 +232,8 @@ module.exports = {
   getActivosEnReparacion,
   enviarAReparacion,
   getUsoDelActivo,
-  getActivosDadosDeBaja
+  getActivosDadosDeBaja,
+  getActivosPorCategoria,
+  buscarActivos,
+  getActivosMasPrestados
 };

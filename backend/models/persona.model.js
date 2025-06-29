@@ -94,9 +94,9 @@ getHistorialPrestamos: (id_persona, callback) => {
 
 getByCredenciales: (correo, contraseña, callback) => {
   const sql = `
-    SELECT id_persona, nombre, correo, rol_id
+    SELECT id_persona, nombre, correo, telefono, cargo, rol_id
     FROM persona
-    WHERE correo = ? AND contraseña = ?
+    WHERE correo = ? AND contraseña = ? AND activo = 1
     LIMIT 1
   `;
 
@@ -113,6 +113,29 @@ getByCredenciales: (correo, contraseña, callback) => {
     callback(null, rows[0]);
   });
 },
+
+eliminar: (id, callback) => {
+    const sql = 'UPDATE persona SET activo = 0 WHERE id_persona = ?';
+    db.query(sql, [id], callback);
+  },
+
+  cambiarRol: (id, callback) => {
+    const obtenerRol = 'SELECT rol_id FROM persona WHERE id_persona = ?';
+    db.query(obtenerRol, [id], (err, rows) => {
+      if (err) return callback(err);
+
+      if (rows.length === 0) return callback(new Error('Persona no encontrada'));
+
+      const rolActual = rows[0].rol_id;
+      const nuevoRol = rolActual === 1 ? 2 : 1;
+
+      const actualizar = 'UPDATE persona SET rol_id = ? WHERE id_persona = ?';
+      db.query(actualizar, [nuevoRol, id], callback);
+    });
+  },
+
+
+
 
 
 

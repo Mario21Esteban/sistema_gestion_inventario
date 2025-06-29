@@ -56,35 +56,32 @@ const createPrestamo = (req, res) => {
 
 
 const getPrestamosAgrupados = (req, res) => {
-  Prestamo.getDetalleAgrupado((err, rows) => {
-    if (err) return res.status(500).json({ error: 'Error en la consulta' });
+  const sql = `
+    SELECT 
+      p.id_prestamo,
+      p.fecha_prestamo,
+      p.fecha_devolucion,
+      p.fecha_devolucion_real,
+      per.nombre AS persona,
+      a.nombre AS activo,
+      a.codigo,
+      a.nro_serie
+    FROM prestamos p
+    JOIN persona per ON p.persona_id = per.id_persona
+    JOIN detalle_prestamos dp ON p.id_prestamo = dp.prestamo_id
+    JOIN activos a ON dp.activo_id = a.id_activo
+    ORDER BY p.fecha_prestamo DESC, p.id_prestamo
+  `;
 
-    const agrupado = [];
-
-    rows.forEach(row => {
-      let prestamo = agrupado.find(p => p.prestamo_id === row.id_prestamo);
-
-      if (!prestamo) {
-        prestamo = {
-          prestamo_id: row.id_prestamo,
-          persona: row.persona,
-          fecha_prestamo: row.fecha_prestamo,
-          fecha_devolucion: row.fecha_devolucion,
-          activos: [],
-          observaciones: row.observaciones || null
-        };
-        agrupado.push(prestamo);
-      }
-
-      prestamo.activos.push({
-        id_activo: row.id_activo,
-        nombre: row.activo
-      });
-    });
-
-    res.json(agrupado);
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error("Error al obtener préstamos agrupados:", err);
+      return res.status(500).json({ error: "Error al obtener préstamos" });
+    }
+    res.json(rows);
   });
 };
+
 
 
 /*const devolverPrestamo = (req, res) => {
@@ -121,16 +118,44 @@ const getPrestamosPorActivo = (req, res) => {
 
 
 const getPrestamosVencidos = (req, res) => {
-  Prestamo.getPrestamosVencidos((err, prestamos) => {
-    if (err) return res.status(500).json({ error: 'Error al obtener préstamos vencidos' });
+  const sql = `
+    SELECT 
+      p.id_prestamo,
+      p.fecha_prestamo,
+      p.fecha_devolucion,
+      p.estado_devolucion,
+      per.nombre AS persona,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id_activo', a.id_activo,
+          'nombre', a.nombre,
+          'codigo', a.codigo,
+          'nro_serie', a.nro_serie
+        )
+      ) AS activos
+    FROM prestamos p
+    JOIN persona per ON per.id_persona = p.persona_id
+    JOIN detalle_prestamos dp ON dp.prestamo_id = p.id_prestamo
+    JOIN activos a ON a.id_activo = dp.activo_id
+    WHERE p.fecha_devolucion < CURDATE()
+      AND p.fecha_devolucion_real IS NULL
+    GROUP BY p.id_prestamo
+  `;
 
-    if (prestamos.length === 0) {
-      return res.status(200).json({ mensaje: 'No hay préstamos vencidos actualmente' });
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error("Error al consultar préstamos vencidos:", err);
+      return res.status(500).json({ error: "Error al obtener préstamos vencidos" });
     }
 
-    res.json(prestamos);
+    if (rows.length === 0) {
+      return res.status(200).json({ mensaje: "No hay préstamos vencidos actualmente" });
+    }
+
+    res.json(rows);
   });
 };
+
 
 
 const marcarPrestamoComoDevuelto = (req, res) => {
@@ -159,21 +184,38 @@ const marcarPrestamoComoDevuelto = (req, res) => {
 
 const getDevolucionesPendientes = (req, res) => {
   const sql = `
-    SELECT p.id_prestamo, p.fecha_prestamo, p.fecha_devolucion, per.nombre AS persona
+    SELECT 
+      p.id_prestamo,
+      p.fecha_prestamo,
+      p.fecha_devolucion,
+      p.estado_devolucion,
+      per.nombre AS persona,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id_activo', a.id_activo,
+          'nombre', a.nombre,
+          'codigo', a.codigo,
+          'nro_serie', a.nro_serie
+        )
+      ) AS activos
     FROM prestamos p
     JOIN persona per ON per.id_persona = p.persona_id
+    JOIN detalle_prestamos dp ON dp.prestamo_id = p.id_prestamo
+    JOIN activos a ON a.id_activo = dp.activo_id
     WHERE p.estado_devolucion = 'pendiente'
+    GROUP BY p.id_prestamo
   `;
 
-  db.query(sql, (err, rows) => {
+  db.query(sql, (err, results) => {
     if (err) {
-      console.error("Error al consultar devoluciones pendientes:", err);
+      console.error("Error al obtener devoluciones pendientes:", err);
       return res.status(500).json({ error: "Error al obtener devoluciones pendientes" });
     }
 
-    res.json(rows);
+    res.json(results);
   });
 };
+
 
 const validarDevolucion = (req, res) => {
   const id = req.params.id;
@@ -181,7 +223,7 @@ const validarDevolucion = (req, res) => {
 
   const sql = `
     UPDATE prestamos
-    SET fecha_devolucion_real = ?, estado_devolucion = 'validado'
+    SET fecha_devolucion_real = ?, estado_devolucion = 'validado', validado_admin = true
     WHERE id_prestamo = ?
   `;
 
@@ -198,6 +240,7 @@ const validarDevolucion = (req, res) => {
     res.json({ mensaje: "Devolución validada correctamente", fecha_devolucion_real: fecha });
   });
 };
+
 
 
 

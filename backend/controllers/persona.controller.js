@@ -1,4 +1,6 @@
 const Persona = require('../models/persona.model');
+const db = require("../config/db");
+
 
 const getPersonas = (req, res) => {
   Persona.getAll((err, data) => {
@@ -87,6 +89,39 @@ const login = (req, res) => {
 };
 
 
+const eliminarPersona = (req, res) => {
+  const id = req.params.id;
+  Persona.eliminar(id, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al eliminar persona' });
+    res.json({ mensaje: 'Persona eliminada correctamente' });
+  });
+};
+
+const cambiarRolPersona = (req, res) => {
+  const id = req.params.id;
+  Persona.cambiarRol(id, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al cambiar el rol' });
+    res.json({ mensaje: 'Rol cambiado correctamente' });
+  });
+};
+
+const reactivarPersona = (req, res) => {
+  const id = req.params.id;
+
+  const sql = `UPDATE persona SET activo = 1 WHERE id_persona = ?`;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al reactivar persona' });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: 'Persona no encontrada' });
+    }
+
+    res.json({ mensaje: 'Persona reactivada correctamente' });
+  });
+};
+
+
 
 
 
@@ -96,5 +131,8 @@ module.exports = {
   createPersona,
   getHistorialPorPersona,
   registrarUsuario,
-  login
+  login,
+  eliminarPersona,
+  cambiarRolPersona,
+  reactivarPersona
 };

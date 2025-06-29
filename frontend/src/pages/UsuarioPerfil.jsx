@@ -22,7 +22,7 @@ function UsuarioPerfil() {
 
       <div className="mb-6 bg-gray-100 p-4 rounded shadow">
         <p><strong>Correo:</strong> {usuario.correo}</p>
-        <p><strong>Cargo:</strong> {usuario.cargo || "No definido"}</p>
+        <p><strong>Cargo:</strong> {usuario.cargo}</p>
         <p><strong>Teléfono:</strong> {usuario.telefono}</p>
       </div>
 

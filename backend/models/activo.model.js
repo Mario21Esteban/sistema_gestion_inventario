@@ -244,7 +244,30 @@ getUsoDelActivo: (id_activo, callback) => {
 
 getActivosDadosDeBaja: (callback) => {
   db.query("SELECT * FROM activos WHERE estado_id = 2", callback);
-}
+},
+
+getActivosMasPrestados: (callback) => {
+  const sql = `
+    SELECT 
+      a.id_activo,
+      a.nombre AS nombre_activo,
+      COUNT(dp.activo_id) AS cantidad_prestamos
+    FROM detalle_prestamos dp
+    JOIN activos a ON dp.activo_id = a.id_activo
+    GROUP BY dp.activo_id
+    ORDER BY cantidad_prestamos DESC
+    LIMIT 10
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error("Error al obtener activos más prestados:", err);
+      return callback(err, null);
+    }
+    callback(null, rows);
+  });
+},
+
 
 
 };

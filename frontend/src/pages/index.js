@@ -14,3 +14,7 @@ export { default as Facturas } from "./Facturas";
 export { default as Ubicaciones } from "./Ubicaciones";
 export { default as UsuarioActivosDisponibles } from "./UsuarioActivosDisponibles";
 export { default as UsuarioPerfil } from "./UsuarioPerfil";
+export { default as SolicitarPrestamoUsuario } from "./SolicitarPrestamoUsuario";
+export { default as DevolucionesPendientes } from "./DevolucionesPendientes";
+export {default as AdminPerfil} from "./AdminPerfil";
+export { default as Dashboard } from "./Dashboard"; 

@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import RegistroUsuarioModal from "../components/RegistroUsuarioModal";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
+
+// 👇 Importamos el logo desde assets
+import logoEscuela from "../assets/LOGO_ESCUELA.jpg";
 
 function Home() {
   const [credenciales, setCredenciales] = useState({ correo: "", contraseña: "" });
   const [mensaje, setMensaje] = useState("");
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
   const navigate = useNavigate();
+  const { login } = useContext(UserContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,34 +20,41 @@ function Home() {
   };
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setMensaje("");
+    e.preventDefault();
+    setMensaje("");
 
-  try {
-    const res = await axios.post("http://localhost:4000/api/personas/login", credenciales);
-    const persona = res.data;
+    try {
+      const res = await axios.post("http://localhost:4000/api/personas/login", credenciales);
+      const persona = res.data;
 
-    // 👉 Guardar datos del usuario en localStorage
-    localStorage.setItem("usuario", JSON.stringify(persona));
+      const usuarioFormateado = {
+        ...persona,
+        rol: persona.rol_id,
+      };
 
-    // Redireccionar según el rol
-    if (persona.rol_id === 1) {
-      navigate("/activos");
-    } else if (persona.rol_id === 2) {
-  navigate("/usuario/perfil");
-} else {
-      setMensaje("⚠️ Rol no autorizado.");
+      login(usuarioFormateado);
+
+      if (persona.rol_id === 1) {
+        navigate("/activos");
+      } else if (persona.rol_id === 2) {
+        navigate("/usuario/perfil");
+      } else {
+        setMensaje("⚠️ Rol no autorizado.");
+      }
+    } catch (err) {
+      console.error("Error en login:", err);
+      setMensaje("❌ Usuario no encontrado o cuenta desactivada");
     }
-  } catch (err) {
-    console.error("Error en login:", err);
-    setMensaje("❌ Credenciales inválidas.");
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+        {/* 👇 Sección del logo */}
+        <div className="flex justify-center mb-4">
+          <img src={logoEscuela} alt="Logo Escuela" className="w-40 h-auto" />
+        </div>
+
         <h2 className="text-2xl font-bold text-center mb-6">Bienvenido al Sistema</h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -77,7 +89,7 @@ function Home() {
             onClick={() => setMostrarRegistro(true)}
             className="text-blue-600 text-sm underline mt-1"
           >
-            👉🏽Ingresa tus datos👈🏽
+            👉🏽 Ingresa tus datos 👈🏽
           </button>
         </div>
       </div>
