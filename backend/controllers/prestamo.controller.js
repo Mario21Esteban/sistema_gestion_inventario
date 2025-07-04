@@ -59,28 +59,31 @@ const getPrestamosAgrupados = (req, res) => {
   const sql = `
     SELECT 
       p.id_prestamo,
+      per.nombre AS persona,
+      per.correo AS correo, 
       p.fecha_prestamo,
       p.fecha_devolucion,
       p.fecha_devolucion_real,
-      per.nombre AS persona,
       a.nombre AS activo,
       a.codigo,
       a.nro_serie
     FROM prestamos p
     JOIN persona per ON p.persona_id = per.id_persona
-    JOIN detalle_prestamos dp ON p.id_prestamo = dp.prestamo_id
-    JOIN activos a ON dp.activo_id = a.id_activo
-    ORDER BY p.fecha_prestamo DESC, p.id_prestamo
+    JOIN detalle_prestamos dp ON dp.prestamo_id = p.id_prestamo
+    JOIN activos a ON a.id_activo = dp.activo_id
+    ORDER BY p.fecha_prestamo DESC
   `;
 
   db.query(sql, (err, rows) => {
     if (err) {
       console.error("Error al obtener préstamos agrupados:", err);
-      return res.status(500).json({ error: "Error al obtener préstamos" });
+      return res.status(500).json({ error: "Error al obtener los préstamos" });
     }
+
     res.json(rows);
   });
 };
+
 
 
 

@@ -35,15 +35,12 @@ function UsuarioActivosDisponibles() {
     <div className="p-4 pb-24 relative">
       <h2 className="text-xl font-bold mb-4">Activos disponibles</h2>
 
-      <button
-        onClick={() => navigate("/usuario/perfil")}
-        className="mb-4 text-blue-600 underline"
-      >
+      <button onClick={() => navigate("/usuario/perfil")} className="mb-4 text-blue-600 underline">
         ← Volver al perfil
       </button>
 
       {/* Filtros */}
-      <div className="mb-4 flex flex-wrap gap-4 items-center">
+      <div className="mb-6 flex flex-wrap gap-4 items-center">
         <select
           value={filtroCategoria}
           onChange={(e) => setFiltroCategoria(e.target.value)}
@@ -63,31 +60,47 @@ function UsuarioActivosDisponibles() {
         />
       </div>
 
-      <ul className="space-y-3">
-        {activosFiltrados.length === 0 ? (
-          <li className="text-gray-500">No se encontraron activos con los filtros aplicados.</li>
-        ) : (
-          activosFiltrados.map((activo) => (
-            <li key={activo.id_activo} className="border p-3 rounded shadow bg-white">
-              <div className="font-semibold">{activo.nombre}</div>
-              <div className="text-sm text-gray-600">{activo.descripcion}</div>
-              <div className="text-xs text-gray-500 mt-1">
-                Código: {activo.codigo} | Serie: {activo.nro_serie}
-              </div>
-              <button
-                onClick={() => toggleActivo(activo)}
-                className={`mt-2 px-4 py-1 rounded text-white ${
-                  carrito.find(a => a.id_activo === activo.id_activo)
-                    ? "bg-red-600"
-                    : "bg-green-600"
+      {activosFiltrados.length === 0 ? (
+        <p className="text-gray-500">No se encontraron activos con los filtros aplicados.</p>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          {activosFiltrados.map((activo) => {
+            const enCarrito = carrito.find((a) => a.id_activo === activo.id_activo);
+            const disponible = activo.estado_id === 1;
+
+            return (
+              <div
+                key={activo.id_activo}
+                className={`border p-4 rounded shadow-sm bg-white transition-all ${
+                  enCarrito ? "border-green-500 bg-green-50" : "hover:shadow-md"
                 }`}
               >
-                {carrito.find(a => a.id_activo === activo.id_activo) ? "Quitar" : "Agregar"}
-              </button>
-            </li>
-          ))
-        )}
-      </ul>
+                <div className="font-semibold text-lg">{activo.nombre}</div>
+                <div className="text-sm text-gray-700">{activo.descripcion}</div>
+                <div className="text-xs text-gray-600 mt-1">
+                  <strong>Código:</strong> {activo.codigo} <br />
+                  <strong>Serie:</strong> {activo.nro_serie}
+                </div>
+
+                <button
+                  onClick={() => toggleActivo(activo)}
+                  disabled={!disponible}
+                  title={!disponible ? "Este activo no se encuentra disponible actualmente." : ""}
+                  className={`mt-3 w-full py-2 rounded text-white text-sm transition ${
+                    !disponible
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : enCarrito
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+                >
+                  {!disponible ? "En préstamo" : enCarrito ? "Quitar" : "Agregar"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Botón flotante */}
       {carrito.length > 0 && (

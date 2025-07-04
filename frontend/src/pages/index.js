@@ -16,5 +16,6 @@ export { default as UsuarioActivosDisponibles } from "./UsuarioActivosDisponible
 export { default as UsuarioPerfil } from "./UsuarioPerfil";
 export { default as SolicitarPrestamoUsuario } from "./SolicitarPrestamoUsuario";
 export { default as DevolucionesPendientes } from "./DevolucionesPendientes";
-export {default as AdminPerfil} from "./AdminPerfil";
-export { default as Dashboard } from "./Dashboard"; 
+export { default as AdminPerfil } from "./AdminPerfil";
+export { default as Dashboard } from "./Dashboard";
+export { default as CambiarContrasena } from "./CambiarContrasena";

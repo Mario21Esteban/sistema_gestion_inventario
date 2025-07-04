@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
 function Navbar() {
-  const { usuario, logout } = useContext(UserContext);
+  const { usuario } = useContext(UserContext);
   const navigate = useNavigate();
 
   if (!usuario) return null;
@@ -24,14 +24,32 @@ function Navbar() {
             <Link to="/facturas">Facturas</Link>
             <Link to="/ubicaciones">Ubicaciones</Link>
             <Link to="/prestamos">Préstamos</Link>
-            <Link to="/admin/devoluciones-pendientes">Devoluciones Pendientes</Link>
+            <Link to="/admin/devoluciones-pendientes">
+              Devoluciones Pendientes
+            </Link>
             <Link to="/admin/dashboard">Estadísticas</Link>
+            <li>
+              <Link
+                to="/cambiar-contraseña"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Cambiar Contraseña
+              </Link>
+            </li>
           </>
         ) : (
           <>
             <Link to="/usuario/perfil">Perfil</Link>
             <Link to="/usuario/activos-disponibles">Solicitar Préstamo</Link>
             <Link to="/usuario/historial">Mis Préstamos</Link>
+            <li>
+              <Link
+                to="/cambiar-contraseña"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Cambiar Contraseña
+              </Link>
+            </li>
           </>
         )}
       </div>
@@ -40,7 +58,6 @@ function Navbar() {
         <span className="text-sm">👤 {usuario.nombre}</span>
         <button
           onClick={() => {
-            logout();
             navigate("/");
           }}
           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"

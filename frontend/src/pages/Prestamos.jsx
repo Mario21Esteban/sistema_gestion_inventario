@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 function Prestamos() {
   const [prestamos, setPrestamos] = useState([]);
@@ -18,6 +21,7 @@ function Prestamos() {
       acc[id] = {
         id_prestamo: id,
         persona: curr.persona,
+        correo: curr.correo,
         fecha_prestamo: curr.fecha_prestamo,
         fecha_devolucion: curr.fecha_devolucion,
         fecha_devolucion_real: curr.fecha_devolucion_real,
@@ -34,9 +38,41 @@ function Prestamos() {
 
   const hoy = new Date();
 
+  const exportarPDF = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Historial de Préstamos", 14, 15);
+
+  const filas = Object.values(agrupados);
+
+  autoTable(doc, {
+    startY: 25,
+    head: [["Nombre", "Correo", "Inicio Préstamo", "Devolución Estimada", "Dev. Real", "Activos"]],
+    body: filas.map(p => [
+      p.persona || "—",
+      p.correo  || "—",
+      p.fecha_prestamo?.split("T")[0] || "—",
+      p.fecha_devolucion?.split("T")[0] || "—",
+      p.fecha_devolucion_real ? p.fecha_devolucion_real.split("T")[0] : "Pendiente",
+      (p.activos || []).map(a => `${a.nombre || "—"} (${a.codigo || "—"})`).join(", ")
+    ])
+  });
+
+  doc.save("prestamos.pdf");
+};
+
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Historial de Préstamos</h2>
+      <button
+  onClick={exportarPDF}
+  className="mb-4 bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
+>
+  Exportar a PDF
+</button>
+
       <ul className="space-y-4">
         {Object.values(agrupados).map((prestamo) => {
           const fechaDevolucion = new Date(prestamo.fecha_devolucion);

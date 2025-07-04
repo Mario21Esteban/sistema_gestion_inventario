@@ -2,25 +2,25 @@ import { createContext, useState, useEffect } from "react";
 
 export const UserContext = createContext();
 
-export function UserProvider({ children }) {
+export const UserProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
 
-  // Cargar usuario desde localStorage al iniciar
+  //  Sincronizar usuario al cargar la app
   useEffect(() => {
-    const storedUser = localStorage.getItem("usuario");
-    if (storedUser) {
-      setUsuario(JSON.parse(storedUser));
+    const usuarioGuardado = localStorage.getItem("usuario");
+    if (usuarioGuardado) {
+      setUsuario(JSON.parse(usuarioGuardado));
     }
   }, []);
 
-  const login = (usuarioData) => {
-    setUsuario(usuarioData);
-    localStorage.setItem("usuario", JSON.stringify(usuarioData));
+  const login = (user) => {
+    localStorage.setItem("usuario", JSON.stringify(user));
+    setUsuario(user);
   };
 
   const logout = () => {
-    setUsuario(null);
     localStorage.removeItem("usuario");
+    setUsuario(null);
   };
 
   return (
@@ -28,4 +28,4 @@ export function UserProvider({ children }) {
       {children}
     </UserContext.Provider>
   );
-}
+};

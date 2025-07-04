@@ -12,29 +12,29 @@ export default function Ubicaciones() {
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Ubicaciones Registradas</h1>
+    <div className="max-w-3xl mx-auto mt-8 bg-white rounded-lg shadow p-8">
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6 border-b pb-2">Ubicaciones</h1>
       {ubicaciones.length === 0 ? (
-        <p>No hay ubicaciones registradas.</p>
+        <div className="text-gray-500 text-center py-8">No hay ubicaciones registradas.</div>
       ) : (
-        <table className="w-full table-auto border border-gray-300">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="px-4 py-2">ID</th>
-              <th className="px-4 py-2">Nombre</th>
-              <th className="px-4 py-2">Detalle de Sala</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ubicaciones.map((u) => (
-              <tr key={u.id_ubicacion} className="text-center border-t">
-                <td className="px-4 py-2">{u.id_ubicacion}</td>
-                <td className="px-4 py-2">{u.nombre}</td>
-                <td className="px-4 py-2">{u.detalle_sala}</td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-blue-50 border-b">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Nombre</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Detalle de Sala</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {ubicaciones.map((u, idx) => (
+                <tr key={u.id_ubicacion} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.nombre}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.detalle_sala}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
