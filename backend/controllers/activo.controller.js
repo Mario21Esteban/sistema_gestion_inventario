@@ -216,6 +216,29 @@ const getActivosMasPrestados = (req, res) => {
   });
 };
 
+const getActivosDisponiblesConPrestamo = (req, res) => {
+  const sql = `
+    SELECT a.*, 
+      CASE 
+        WHEN EXISTS (
+          SELECT 1 FROM detalle_prestamos dp
+          JOIN prestamos p ON dp.prestamo_id = p.id_prestamo
+          WHERE dp.activo_id = a.id_activo AND p.fecha_devolucion_real IS NULL
+        ) THEN 1 ELSE 0
+      END AS en_prestamo
+    FROM activos a
+    WHERE a.estado_id = 1
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error("Error al obtener activos disponibles con préstamo:", err);
+      return res.status(500).json({ error: "Error al obtener activos" });
+    }
+
+    res.json(rows);
+  });
+};
 
 
 
@@ -235,5 +258,6 @@ module.exports = {
   getActivosDadosDeBaja,
   getActivosPorCategoria,
   buscarActivos,
-  getActivosMasPrestados
+  getActivosMasPrestados,
+  getActivosDisponiblesConPrestamo
 };

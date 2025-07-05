@@ -16,7 +16,8 @@ const {
   getActivosDadosDeBaja,
   getActivosPorCategoria,
   buscarActivos,
-  getActivosMasPrestados
+  getActivosMasPrestados,
+  getActivosDisponiblesConPrestamo
 } = require('../controllers/activo.controller');
 
 
@@ -24,6 +25,7 @@ const {
 
 // Rutas para manejar los activos
 router.get('/', getActivos);
+router.get('/disponibles/prestamos', getActivosDisponiblesConPrestamo);
 router.get('/disponibles', getActivosDisponibles);
 router.get('/baja', getActivosDadosDeBaja);
 router.get('/reparacion', getActivosEnReparacion);
@@ -39,6 +41,8 @@ router.put('/:id/reparacion', enviarAReparacion);
 router.get('/:id/uso', getUsoDelActivo);
 router.get("/categoria/:categoria", getActivosPorCategoria);
 router.get("/buscar/:termino", buscarActivos);
+router.get('/disponibles', getActivosDisponiblesConPrestamo);
+
 
 
 

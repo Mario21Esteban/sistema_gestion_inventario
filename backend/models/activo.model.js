@@ -268,6 +268,30 @@ getActivosMasPrestados: (callback) => {
   });
 },
 
+getDisponiblesConPrestamo: (callback) => {
+  const sql = `
+    SELECT a.*, 
+      CASE 
+        WHEN EXISTS (
+          SELECT 1 FROM detalle_prestamos dp
+          JOIN prestamos p ON p.id_prestamo = dp.prestamo_id
+          WHERE dp.activo_id = a.id_activo 
+            AND p.estado_devolucion = 'en curso'
+        ) THEN 1
+        ELSE 0
+      END AS en_prestamo
+    FROM activos a
+    WHERE a.estado_id = 1
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error("Error al obtener activos disponibles con préstamos:", err);
+      return callback(err, null);
+    }
+    callback(null, rows);
+  });
+},
 
 
 };

@@ -34,6 +34,7 @@ El frontend de este proyecto está construido con React y Vite, lo que permite u
 ### Principales funcionalidades
 
 - **Gestión de inventario**: Permite visualizar, agregar, editar y eliminar productos del inventario.
+- **Gestión de usuarios**: Permite cambiar roles de usuarios, eliminar temporalmente, reactivar cuentas.
 - **Interfaz intuitiva**: Navegación sencilla y diseño responsivo para una mejor experiencia de usuario.
 - **Consumo de API**: Comunicación con el backend para obtener y actualizar datos en tiempo real.
 - **Validación de formularios**: Asegura que los datos ingresados sean correctos antes de enviarlos.

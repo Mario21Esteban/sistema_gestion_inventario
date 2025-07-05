@@ -12,9 +12,10 @@ function UsuarioActivosDisponibles() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:4000/api/activos/disponibles")
-      .then(res => setActivos(res.data))
-      .catch(err => console.error("Error al cargar activos:", err));
+    axios
+      .get("http://localhost:4000/api/activos/disponibles/prestamos")  // 🔥 Nueva ruta aquí
+      .then((res) => setActivos(res.data))
+      .catch((err) => console.error("Error al cargar activos:", err));
   }, []);
 
   const toggleActivo = (activo) => {
@@ -22,7 +23,7 @@ function UsuarioActivosDisponibles() {
     yaExiste ? quitarActivo(activo.id_activo) : agregarActivo(activo);
   };
 
-  const activosFiltrados = activos.filter(activo => {
+  const activosFiltrados = activos.filter((activo) => {
     const coincideCategoria = filtroCategoria ? activo.categoria === filtroCategoria : true;
     const coincideBusqueda = busqueda
       ? activo.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -35,7 +36,10 @@ function UsuarioActivosDisponibles() {
     <div className="p-4 pb-24 relative">
       <h2 className="text-xl font-bold mb-4">Activos disponibles</h2>
 
-      <button onClick={() => navigate("/usuario/perfil")} className="mb-4 text-blue-600 underline">
+      <button
+        onClick={() => navigate("/usuario/perfil")}
+        className="mb-4 text-blue-600 underline"
+      >
         ← Volver al perfil
       </button>
 
@@ -66,7 +70,7 @@ function UsuarioActivosDisponibles() {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
           {activosFiltrados.map((activo) => {
             const enCarrito = carrito.find((a) => a.id_activo === activo.id_activo);
-            const disponible = activo.estado_id === 1;
+            const enPrestamo = activo.en_prestamo === 1;
 
             return (
               <div
@@ -75,7 +79,14 @@ function UsuarioActivosDisponibles() {
                   enCarrito ? "border-green-500 bg-green-50" : "hover:shadow-md"
                 }`}
               >
-                <div className="font-semibold text-lg">{activo.nombre}</div>
+                <div className="flex justify-between items-center">
+                  <div className="font-semibold text-lg">{activo.nombre}</div>
+                  {enPrestamo && (
+                    <span className="bg-yellow-400 text-white text-xs px-2 py-1 rounded">
+                      ⚠️ En préstamo
+                    </span>
+                  )}
+                </div>
                 <div className="text-sm text-gray-700">{activo.descripcion}</div>
                 <div className="text-xs text-gray-600 mt-1">
                   <strong>Código:</strong> {activo.codigo} <br />
@@ -84,17 +95,17 @@ function UsuarioActivosDisponibles() {
 
                 <button
                   onClick={() => toggleActivo(activo)}
-                  disabled={!disponible}
-                  title={!disponible ? "Este activo no se encuentra disponible actualmente." : ""}
+                  disabled={enPrestamo}
+                  title={enPrestamo ? "Este activo ya está prestado." : ""}
                   className={`mt-3 w-full py-2 rounded text-white text-sm transition ${
-                    !disponible
+                    enPrestamo
                       ? "bg-gray-400 cursor-not-allowed"
                       : enCarrito
                       ? "bg-red-600 hover:bg-red-700"
                       : "bg-green-600 hover:bg-green-700"
                   }`}
                 >
-                  {!disponible ? "En préstamo" : enCarrito ? "Quitar" : "Agregar"}
+                  {enPrestamo ? "No disponible" : enCarrito ? "Quitar" : "Agregar"}
                 </button>
               </div>
             );
