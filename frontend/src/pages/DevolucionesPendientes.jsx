@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useOutletContext } from "react-router-dom";
+
 
 function DevolucionesPendientes() {
   const [prestamos, setPrestamos] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const { refrescarVencidos } = useOutletContext();
+
 
   useEffect(() => {
     cargarPendientes();
@@ -23,7 +27,8 @@ function DevolucionesPendientes() {
     try {
       await axios.put(`http://localhost:4000/api/prestamos/${id}/validar-devolucion`);
       setMensaje("✅ Devolución validada correctamente.");
-      cargarPendientes(); // Refrescar lista
+      cargarPendientes();
+      refrescarVencidos(); // Refrescar lista
     } catch (err) {
       console.error("Error al validar devolución:", err);
       setMensaje("❌ Error al validar devolución.");

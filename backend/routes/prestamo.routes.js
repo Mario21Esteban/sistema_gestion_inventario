@@ -8,7 +8,8 @@ const { getPrestamos,
     getPrestamosVencidos,
     marcarPrestamoComoDevuelto,
     getDevolucionesPendientes,
-    validarDevolucion
+    validarDevolucion,
+    notificarPrestamosVencidos
 } = require('../controllers/prestamo.controller');
 
 router.get('/', getPrestamos);
@@ -20,6 +21,6 @@ router.get('/activos/:id', getPrestamosPorActivo);
 router.put('/:id/devolver', marcarPrestamoComoDevuelto);
 router.get('/devoluciones-pendientes', getDevolucionesPendientes);
 router.put('/:id/validar-devolucion', validarDevolucion);
-
+router.post('/notificar-vencidos', notificarPrestamosVencidos);
 
 module.exports = router;

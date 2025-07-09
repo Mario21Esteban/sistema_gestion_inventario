@@ -1,6 +1,6 @@
 const Prestamo = require('../models/prestamo.model');
 const db = require('../config/db');
-
+const enviarCorreo = require('../utils/mailer');
 
 const getPrestamos = (req, res) => {
   Prestamo.getAll((err, data) => {
@@ -240,7 +240,95 @@ const validarDevolucion = (req, res) => {
       return res.status(404).json({ mensaje: "Préstamo no encontrado" });
     }
 
-    res.json({ mensaje: "Devolución validada correctamente", fecha_devolucion_real: fecha });
+    // ✅ Obtener datos del usuario asociado al préstamo
+    const sqlUsuario = `
+      SELECT per.nombre, per.correo
+      FROM prestamos pre
+      JOIN persona per ON pre.persona_id = per.id_persona
+      WHERE pre.id_prestamo = ?
+    `;
+
+    db.query(sqlUsuario, [id], async (err2, rows) => {
+      if (err2) {
+        console.error("Error al obtener datos del usuario:", err2);
+        return res.status(500).json({ error: "Devolución validada, pero error al notificar." });
+      }
+
+      const usuario = rows[0];
+
+      if (usuario) {
+        const mensaje = `
+          <p>Estimado/a ${usuario.nombre},</p>
+          <p>Le informamos que su devolución de préstamo ha sido validada correctamente el día <strong>${fecha}</strong>.</p>
+          <p>Gracias por utilizar nuestro sistema.</p>
+        `;
+
+        try {
+          await enviarCorreo(
+            usuario.correo,
+            "Confirmación de Devolución Validada",
+            mensaje
+          );
+        } catch (error) {
+          console.error(`Error al enviar correo a ${usuario.correo}:`, error);
+        }
+      }
+
+      res.json({ mensaje: "Devolución validada correctamente", fecha_devolucion_real: fecha });
+    });
+  });
+};
+
+
+const notificarPrestamosVencidos = (req, res) => {
+  const sql = `
+    SELECT pre.id_prestamo, per.nombre, per.correo, pre.fecha_devolucion
+    FROM prestamos pre
+    JOIN persona per ON pre.persona_id = per.id_persona
+    WHERE pre.fecha_devolucion < CURDATE()
+    AND pre.fecha_devolucion_real IS NULL
+  `;
+
+  db.query(sql, async (err, resultados) => {
+    if (err) {
+      console.error('Error al obtener préstamos vencidos:', err);
+      return res.status(500).json({ error: 'Error al consultar préstamos vencidos' });
+    }
+
+    if (resultados.length === 0) {
+      return res.json({ mensaje: 'No hay préstamos vencidos para notificar.' });
+    }
+
+    let enviados = 0;
+
+    for (const prestamo of resultados) {
+      // ✅ Formatear fecha al estilo "05 de julio de 2025"
+      const fechaFormateada = new Date(prestamo.fecha_devolucion).toLocaleDateString('es-CL', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      const mensaje = `
+        <p>Estimado/a ${prestamo.nombre},</p>
+        <p>Se ha detectado que su préstamo con fecha de devolución prevista para el 
+        <strong>${fechaFormateada}</strong> se encuentra vencido.</p>
+        <p>Por favor, regularice la situación lo antes posible o contacte al encargado.</p>
+      `;
+
+      try {
+        await enviarCorreo(
+          prestamo.correo,
+          'Aviso de Préstamo Vencido',
+          mensaje
+        );
+        enviados++;
+      } catch (error) {
+        console.error(`Error al enviar correo a ${prestamo.correo}:`, error);
+      }
+    }
+
+    res.json({ mensaje: `Correos enviados: ${enviados}` });
   });
 };
 
@@ -260,5 +348,6 @@ module.exports = {
   getPrestamosVencidos,
   marcarPrestamoComoDevuelto,
   getDevolucionesPendientes,
-  validarDevolucion
+  validarDevolucion,
+  notificarPrestamosVencidos
 };

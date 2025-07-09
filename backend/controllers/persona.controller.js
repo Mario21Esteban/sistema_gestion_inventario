@@ -1,6 +1,7 @@
 const Persona = require("../models/persona.model");
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
+const enviarCorreo = require("../utils/mailer"); // Módulo de envío de correos
 
 const getPersonas = (req, res) => {
   Persona.getAll((err, data) => {
@@ -31,7 +32,6 @@ const createPersona = async (req, res) => {
   }
 
   try {
-    // ✅ Cifrar contraseña antes de registrar
     const contraseñaCifrada = await bcrypt.hash(data.contraseña, 10);
     data.contraseña = contraseñaCifrada;
 
@@ -80,7 +80,6 @@ const getHistorialPorPersona = (req, res) => {
 const registrarUsuario = async (req, res) => {
   const data = req.body;
 
-  // Validar campos obligatorios
   const obligatorios = ["nombre", "correo", "telefono", "cargo", "contraseña"];
   const faltantes = obligatorios.filter((campo) => !data[campo]);
 
@@ -93,17 +92,26 @@ const registrarUsuario = async (req, res) => {
   data.usuario = data.usuario || "No especificado";
 
   try {
-    // ✅ Cifrar contraseña para registros normales
     const contraseñaCifrada = await bcrypt.hash(data.contraseña, 10);
     data.contraseña = contraseñaCifrada;
 
-    Persona.registroBasico(data, (err, result) => {
+    Persona.registroBasico(data, async (err, result) => {
       if (err)
         return res.status(500).json({ error: "Error al registrar el usuario" });
 
-      res
-        .status(201)
-        .json({ mensaje: "Usuario registrado", id_persona: result.insertId });
+      // ✅ Envío de correo de bienvenida tras registro
+      await enviarCorreo(
+        data.correo,
+        "Bienvenido/a al Sistema de Inventario",
+        `<p>Hola ${data.nombre},</p>
+        <p>Tu cuenta ha sido creada correctamente en el sistema de gestión de inventario.</p>
+        <p>Ahora puedes iniciar sesión con tu correo registrado.</p>`
+      );
+
+      res.status(201).json({
+        mensaje: "Usuario registrado y correo enviado correctamente",
+        id_persona: result.insertId,
+      });
     });
   } catch (err) {
     console.error("Error al cifrar contraseña:", err);
