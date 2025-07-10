@@ -3,6 +3,37 @@ import axios from "axios";
 import FacturaModal from "./FacturaModal";
 
 function ActivoRegistro() {
+  // Función para comprimir imágenes
+  const comprimirImagen = (file, maxWidth = 600, maxHeight = 450, quality = 0.4) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Calcular nuevas dimensiones
+          let { width, height } = img;
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Dibujar y comprimir
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
@@ -79,7 +110,7 @@ function ActivoRegistro() {
       setFormData({
         nombre: "",
         descripcion: "",
-        foto: "pendiente",
+        foto: "",
         costo: "",
         año_adquisicion: "",
         nro_serie: "",
@@ -93,7 +124,13 @@ function ActivoRegistro() {
 
     } catch (err) {
       console.error(err);
-      setMensaje("❌ Error al registrar el activo.");
+      if (err.response && err.response.status === 413) {
+        setMensaje("❌ El archivo es demasiado grande. Intenta con una imagen más pequeña.");
+      } else if (err.response && err.response.data && err.response.data.message && err.response.data.message.includes('Data too long')) {
+        setMensaje("❌ La imagen es demasiado grande para la base de datos. Intenta con una imagen más pequeña.");
+      } else {
+        setMensaje("❌ Error al registrar el activo.");
+      }
     }
   };
 
@@ -110,20 +147,52 @@ function ActivoRegistro() {
         <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} placeholder="Código Interno" className="input" />
 
         <input
-  type="file"
-  accept="image/*"
-  onChange={(e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, foto: reader.result }));
-      };
-      reader.readAsDataURL(file); // convierte a base64
-    }
-  }}
-  className="input col-span-2"
-/>
+          type="file"
+          accept="image/*"
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              // Verificar tamaño del archivo (máximo 5MB)
+              if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                e.target.value = '';
+                return;
+              }
+              
+              try {
+                // Comprimir la imagen usando la función auxiliar
+                const compressedImage = await comprimirImagen(file, 600, 450, 0.3);
+                
+                // Verificar el tamaño del base64 resultante (aproximadamente 1MB = 1.4MB en base64)
+                const base64Size = compressedImage.length * 0.75; // Aproximación del tamaño real
+                if (base64Size > 1024 * 1024) { // 1MB
+                  alert('La imagen comprimida sigue siendo demasiado grande. Intenta con una imagen más pequeña.');
+                  return;
+                }
+                
+                setFormData((prev) => ({ ...prev, foto: compressedImage }));
+              } catch (error) {
+                console.error('Error al comprimir la imagen:', error);
+                alert('Error al procesar la imagen. Por favor, intenta con otra imagen.');
+              }
+            }
+          }}
+          className="input col-span-2"
+        />
+        
+        {/* Vista previa de la imagen */}
+        {formData.foto && formData.foto !== "pendiente" && (
+          <div className="col-span-2 mt-2">
+            <p className="text-sm text-gray-600 mb-2">Vista previa de la imagen:</p>
+            <div className="flex justify-center">
+              <img 
+                src={formData.foto} 
+                alt="Vista previa" 
+                className="max-w-xs max-h-32 object-contain rounded-lg border border-gray-200"
+              />
+            </div>
+          </div>
+        )}
 
 
 

@@ -60,7 +60,36 @@ const recargarActivos = async () => {
       <ul className="space-y-2">
         {activos.map(activo => (
           <li key={activo.id_activo} className="border p-2 rounded bg-green-50 shadow-sm">
-            <strong>{activo.nombre}</strong> — {activo.descripcion}
+            <div className="flex gap-4">
+              {/* Miniatura de imagen */}
+              <div className="flex-shrink-0">
+                {activo.foto && activo.foto !== "pendiente" ? (
+                  <img 
+                    src={activo.foto} 
+                    alt={`Imagen de ${activo.nombre}`}
+                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              
+              {/* Información del activo */}
+              <div className="flex-1">
+                <strong>{activo.nombre}</strong> — {activo.descripcion}
+                <div className="text-xs text-gray-500 mt-1">
+                  Código: {activo.codigo} | Serie: {activo.nro_serie}
+                </div>
+              </div>
+            </div>
+            
             <div className="flex gap-2 mt-2">
               <button onClick={() => navigate(`/activos/${activo.id_activo}`)} className="btn-ver">Ver detalle</button>
               <button
